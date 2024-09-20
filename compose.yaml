@@ -1,0 +1,85 @@
+################################################################################
+# Stack: Node-RED TimescaleDB Grafana
+################################################################################
+# Initialization steps
+#   Get .env file
+#   Start all containers: docker compose up -d
+#
+#   Docker commands example
+#     Build custom-node-red image: docker build . -t custom-node-red
+#     docker run -p 51880:1880 -v /home/pi/IOT/node-red/data:/data --name nodered custom-node-red
+################################################################################
+
+services:
+  # https://docs.timescale.com/self-hosted/latest/install/installation-docker/#install-self-hosted-timescaledb-from-a-pre-built-container
+  # Volume direction inside container:
+  #     timescaledb-ha -> /home/postgres/pgdata/data
+  #     timescaledb -> /var/lib/postgresql/data
+  # docker exec -it timescale bash
+  timescale:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescale
+    restart: always
+    ports:
+      - "55432:5432"
+    networks:
+      - iot-net
+    volumes:
+      - /home/pi/IOT/timescale/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  
+  # docker exec -it grafana bash
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    # Check user id: "id -u"
+    user: "1000"
+    ports:
+      - "53000:3000"
+    networks:
+      - iot-net
+    volumes:
+      - /home/pi/IOT/grafana/data:/var/lib/grafana
+    depends_on:
+      timescale:
+        condition: service_started
+
+  # docker exec -it nodered bash
+  nodered:
+    # Build custom node-red with preinstalled modules
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: custom-node-red
+    container_name: nodered
+    restart: always
+    privileged: true
+    ports:
+      - "51880:1880"    # Node-red UI
+      - "51883:1883"    # MQTT
+    devices:
+      - /dev/i2c-1:/dev/i2c-1
+    networks:
+      - iot-net
+    volumes:
+      - /home/pi/IOT/node-red/data:/data
+    environment:
+      - POSTGRES_USERNAME=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PLC_PRIVATE_IP=${PLC_PRIVATE_IP}
+      - PLC_PORT=${PLC_PORT}
+      - PHONE_NUMBER_1=${PHONE_NUMBER_1}
+      - PHONE_NUMBER_2=${PHONE_NUMBER_2}
+    depends_on:
+      timescale:
+        condition: service_started
+networks:
+  iot-net:
+    name: iot-net
+    ipam:
+      driver: default
+      config:
+        # This will assign ip 172.30.0.1 to host
+        - subnet: "172.30.0.0/24"

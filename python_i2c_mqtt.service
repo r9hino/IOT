@@ -1,0 +1,13 @@
+[Unit]
+Description=Python script I2C and MQTT
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/IOT
+ExecStart=/home/pi/IOT/.venv/bin/python3 /home/pi/IOT/i2c_mqtt.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

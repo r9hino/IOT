@@ -1,0 +1,15 @@
+{
+    "name": "node-red-project",
+    "description": "A Node-RED Project",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "node-red-configurable-ping": "~1.0.1",
+        "node-red-contrib-aedes": "~0.13.0",
+        "node-red-contrib-postgresql": "~0.14.0",
+        "node-red-contrib-s7": "~3.1.0",
+        "node-red-contrib-soap-plus": "~1.2.0",
+        "node-red-contrib-whatsapp-cmb": "~1.0.3",
+        "node-red-node-email": "~2.1.0"
+    }
+}
