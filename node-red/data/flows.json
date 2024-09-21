@@ -87,22 +87,6 @@
         "sessionExpiry": ""
     },
     {
-        "id": "92edb2e359363f90",
-        "type": "debug",
-        "z": "f6f2187d.f17ca8",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 800,
-        "y": 340,
-        "wires": []
-    },
-    {
         "id": "fbd6fb10ebb4e77f",
         "type": "function",
         "z": "f6f2187d.f17ca8",
@@ -114,8 +98,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 260,
+        "x": 400,
+        "y": 380,
         "wires": [
             [
                 "801304a26341c444"
@@ -135,8 +119,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 800,
-        "y": 260,
+        "x": 540,
+        "y": 380,
         "wires": []
     },
     {
@@ -160,125 +144,11 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 510,
-        "y": 260,
+        "x": 250,
+        "y": 380,
         "wires": [
             [
                 "fbd6fb10ebb4e77f"
-            ]
-        ]
-    },
-    {
-        "id": "f71277c148fb3424",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar estado presostato - Tabla sensor_log",
-        "query": "INSERT INTO sensor_log (time, sensor_id, measurement, status)\n    VALUES (NOW(), 3, {{{ msg.payload }}}, 'activo');",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 850,
-        "y": 460,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "7b23eb345a75abd6",
-        "type": "change",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "rules": [
-            {
-                "t": "change",
-                "p": "payload",
-                "pt": "msg",
-                "from": "true",
-                "fromt": "bool",
-                "to": "1",
-                "tot": "num"
-            },
-            {
-                "t": "change",
-                "p": "payload",
-                "pt": "msg",
-                "from": "false",
-                "fromt": "bool",
-                "to": "0",
-                "tot": "num"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 540,
-        "y": 460,
-        "wires": [
-            [
-                "f71277c148fb3424"
-            ]
-        ]
-    },
-    {
-        "id": "d843fce6292326d2",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbei",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 370,
-        "y": 340,
-        "wires": [
-            [
-                "92edb2e359363f90"
-            ]
-        ]
-    },
-    {
-        "id": "4224d753ab9bdffa",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbei",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 370,
-        "y": 400,
-        "wires": [
-            [
-                "92edb2e359363f90"
-            ]
-        ]
-    },
-    {
-        "id": "83cacdf41bfc6702",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbei",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 370,
-        "y": 460,
-        "wires": [
-            [
-                "7b23eb345a75abd6"
             ]
         ]
     },
@@ -432,19 +302,48 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2;      // Ancho canal m\nconst S = 0.0043;   // Pendiente canal m\nconst n = 0.01;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
+        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2;      // Ancho canal m\nconst S = 0.0043;   // Pendiente canal m\nconst n = 0.01;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\nif(h < 0) h = 0;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 360,
+        "x": 340,
         "y": 220,
         "wires": [
             [
-                "893673ea93e0e06f"
+                "893673ea93e0e06f",
+                "cc9d55b43af50ae2"
             ]
+        ]
+    },
+    {
+        "id": "53b2176712387123",
+        "type": "link in",
+        "z": "f6f2187d.f17ca8",
+        "name": "link in 1",
+        "links": [],
+        "x": 585,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cc9d55b43af50ae2",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar registro",
+        "query": "INSERT INTO registros (fecha_hora, id_obra, profundidad, velocidad, caudal)\n    VALUES (NOW(), 1, {{{ msg.payload.profundidad }}}, {{{ msg.payload.velocidad }}},\n    {{{ msg.payload.caudal }}});",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 600,
+        "y": 280,
+        "wires": [
+            []
         ]
     },
     {
@@ -532,14 +431,14 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "GetSOAP",
-        "func": "\nlet newmsg = {\n    server: \"https://snia.mop.gob.cl/controlextraccion/wsdl/datosExtraccion/SendDataExtraccionService\",\n    options: {\n        overrideRootElement: {\n            \"namespace\": \"get\",\n            \"xmlnsAttributes\": [{\n                \"name\": \"xmlns:get\",\n                \"value\": \"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/GetDataExtraccionRequest\"\n            }]\n        }\n    },\n    headers: {},\n    payload: {\n            codigoDeLaObra: \"OB-1401-255\",\n            numeroComprobante: \"a337b5d3158d0af71ddec1159d9ca690\"\n    }\n};\n\nreturn newmsg;",
+        "func": "\nlet newmsg = {\n    server: \"https://snia.mop.gob.cl/controlextraccion/wsdl/datosExtraccion/SendDataExtraccionService\",\n    options: {\n        overrideRootElement: {\n            \"namespace\": \"get\",\n            \"xmlnsAttributes\": [{\n                \"name\": \"xmlns:get\",\n                \"value\": \"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/GetDataExtraccionRequest\"\n            }]\n        }\n    },\n    headers: {},\n    payload: {\n            codigoDeLaObra: \"OB-1402-497\",\n            numeroComprobante: \"dc921232e0efcac1\"\n    }\n};\n\nreturn newmsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 260,
+        "x": 240,
         "y": 240,
         "wires": [
             [
@@ -611,7 +510,7 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 430,
+        "x": 390,
         "y": 300,
         "wires": [
             [
@@ -632,7 +531,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 260,
+        "x": 240,
         "y": 300,
         "wires": [
             [
@@ -653,8 +552,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 720,
-        "y": 360,
+        "x": 580,
+        "y": 340,
         "wires": []
     },
     {
@@ -665,8 +564,8 @@
         "property": "payload",
         "attr": "",
         "chr": "",
-        "x": 570,
-        "y": 300,
+        "x": 230,
+        "y": 340,
         "wires": [
             [
                 "5ad961939d054b56"
@@ -685,8 +584,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 730,
-        "y": 300,
+        "x": 390,
+        "y": 340,
         "wires": [
             [
                 "ed77c53d5e36c072"

@@ -87,22 +87,6 @@
         "sessionExpiry": ""
     },
     {
-        "id": "92edb2e359363f90",
-        "type": "debug",
-        "z": "f6f2187d.f17ca8",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 800,
-        "y": 340,
-        "wires": []
-    },
-    {
         "id": "fbd6fb10ebb4e77f",
         "type": "function",
         "z": "f6f2187d.f17ca8",
@@ -114,8 +98,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 660,
-        "y": 260,
+        "x": 480,
+        "y": 500,
         "wires": [
             [
                 "801304a26341c444"
@@ -135,8 +119,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 800,
-        "y": 260,
+        "x": 620,
+        "y": 500,
         "wires": []
     },
     {
@@ -160,8 +144,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 510,
-        "y": 260,
+        "x": 330,
+        "y": 500,
         "wires": [
             [
                 "fbd6fb10ebb4e77f"
@@ -178,8 +162,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 850,
-        "y": 460,
+        "x": 750,
+        "y": 420,
         "wires": [
             []
         ]
@@ -214,51 +198,11 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 540,
-        "y": 460,
+        "x": 460,
+        "y": 420,
         "wires": [
             [
                 "f71277c148fb3424"
-            ]
-        ]
-    },
-    {
-        "id": "d843fce6292326d2",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbei",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 370,
-        "y": 340,
-        "wires": [
-            [
-                "92edb2e359363f90"
-            ]
-        ]
-    },
-    {
-        "id": "4224d753ab9bdffa",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbei",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 370,
-        "y": 400,
-        "wires": [
-            [
-                "92edb2e359363f90"
             ]
         ]
     },
@@ -274,8 +218,8 @@
         "septopics": true,
         "property": "payload",
         "topi": "topic",
-        "x": 370,
-        "y": 460,
+        "x": 290,
+        "y": 420,
         "wires": [
             [
                 "7b23eb345a75abd6"
@@ -432,19 +376,48 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2;      // Ancho canal m\nconst S = 0.0043;   // Pendiente canal m\nconst n = 0.01;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
+        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2;      // Ancho canal m\nconst S = 0.0043;   // Pendiente canal m\nconst n = 0.01;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\nif(h < 0) h = 0;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 360,
+        "x": 340,
         "y": 220,
         "wires": [
             [
-                "893673ea93e0e06f"
+                "893673ea93e0e06f",
+                "cc9d55b43af50ae2"
             ]
+        ]
+    },
+    {
+        "id": "53b2176712387123",
+        "type": "link in",
+        "z": "f6f2187d.f17ca8",
+        "name": "link in 1",
+        "links": [],
+        "x": 585,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cc9d55b43af50ae2",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar registro",
+        "query": "INSERT INTO registros (fecha_hora, id_obra, profundidad, velocidad, caudal)\n    VALUES (NOW(), 1, {{{ msg.payload.profundidad }}}, {{{ msg.payload.velocidad }}},\n    {{{ msg.payload.caudal }}});",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 600,
+        "y": 280,
+        "wires": [
+            []
         ]
     },
     {
@@ -532,14 +505,14 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "GetSOAP",
-        "func": "\nlet newmsg = {\n    server: \"https://snia.mop.gob.cl/controlextraccion/wsdl/datosExtraccion/SendDataExtraccionService\",\n    options: {\n        overrideRootElement: {\n            \"namespace\": \"get\",\n            \"xmlnsAttributes\": [{\n                \"name\": \"xmlns:get\",\n                \"value\": \"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/GetDataExtraccionRequest\"\n            }]\n        }\n    },\n    headers: {},\n    payload: {\n            codigoDeLaObra: \"OB-1401-255\",\n            numeroComprobante: \"a337b5d3158d0af71ddec1159d9ca690\"\n    }\n};\n\nreturn newmsg;",
+        "func": "\nlet newmsg = {\n    server: \"https://snia.mop.gob.cl/controlextraccion/wsdl/datosExtraccion/SendDataExtraccionService\",\n    options: {\n        overrideRootElement: {\n            \"namespace\": \"get\",\n            \"xmlnsAttributes\": [{\n                \"name\": \"xmlns:get\",\n                \"value\": \"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/GetDataExtraccionRequest\"\n            }]\n        }\n    },\n    headers: {},\n    payload: {\n            codigoDeLaObra: \"OB-1402-497\",\n            numeroComprobante: \"dc921232e0efcac1\"\n    }\n};\n\nreturn newmsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 260,
+        "x": 240,
         "y": 240,
         "wires": [
             [
@@ -611,7 +584,7 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 430,
+        "x": 390,
         "y": 300,
         "wires": [
             [
@@ -625,14 +598,14 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "PutSOAP",
-        "func": "\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>2024-09-02T14:01:00Z</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <!--You have a CHOICE of the next 2 items at this level-->\n         <!--Optional:-->\n         <aut:authDataExtraccionSubterranea>\n            <aut:fechaMedicion>02-09-2024</aut:fechaMedicion>\n            <aut:horaMedicion>14:01:00</aut:horaMedicion>\n            <aut:totalizador>1005</aut:totalizador>\n            <aut:caudal>10</aut:caudal>\n            <aut:alturaLimnimetrica>1</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSubterranea>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nreturn msg;",
+        "func": "\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>2024-09-02T14:01:00Z</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <!--You have a CHOICE of the next 2 items at this level-->\n         <!--Optional:-->\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>02-09-2024</aut:fechaMedicion>\n            <aut:horaMedicion>14:01:00</aut:horaMedicion>\n            <aut:caudal>10</aut:caudal>\n            <aut:alturaLimnimetrica>1</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 260,
+        "x": 240,
         "y": 300,
         "wires": [
             [
@@ -653,8 +626,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 720,
-        "y": 360,
+        "x": 580,
+        "y": 340,
         "wires": []
     },
     {
@@ -665,8 +638,8 @@
         "property": "payload",
         "attr": "",
         "chr": "",
-        "x": 570,
-        "y": 300,
+        "x": 230,
+        "y": 340,
         "wires": [
             [
                 "5ad961939d054b56"
@@ -685,8 +658,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 730,
-        "y": 300,
+        "x": 390,
+        "y": 340,
         "wires": [
             [
                 "ed77c53d5e36c072"

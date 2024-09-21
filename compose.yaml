@@ -58,7 +58,7 @@ services:
     privileged: true
     ports:
       - "51880:1880"    # Node-red UI
-      - "51883:1883"    # MQTT
+      - "51883:1883"    # MQTT for sending I2C data from the python script
     devices:
       - /dev/i2c-1:/dev/i2c-1
     networks:
