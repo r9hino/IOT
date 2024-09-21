@@ -319,18 +319,6 @@
         ]
     },
     {
-        "id": "53b2176712387123",
-        "type": "link in",
-        "z": "f6f2187d.f17ca8",
-        "name": "link in 1",
-        "links": [],
-        "x": 585,
-        "y": 260,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "cc9d55b43af50ae2",
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
@@ -359,8 +347,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 470,
-        "y": 60,
+        "x": 410,
+        "y": 40,
         "wires": []
     },
     {
@@ -385,7 +373,7 @@
         "payload": "This is a test",
         "payloadType": "str",
         "x": 100,
-        "y": 120,
+        "y": 100,
         "wires": [
             [
                 "ab24375cb61c90bf"
@@ -406,7 +394,7 @@
         "name": "philippe.ilharreguy@gmail.com",
         "dname": "PI email",
         "x": 260,
-        "y": 120,
+        "y": 100,
         "wires": []
     },
     {
@@ -423,7 +411,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 700,
-        "y": 240,
+        "y": 160,
         "wires": []
     },
     {
@@ -439,7 +427,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 240,
+        "y": 160,
         "wires": [
             [
                 "dd90b7fa6e9340fa"
@@ -468,7 +456,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 240,
+        "y": 160,
         "wires": [
             [
                 "68926513297359aa"
@@ -484,7 +472,7 @@
         "wsdl": "22d655552657cf36",
         "method": "getDataExtraccionOp",
         "x": 510,
-        "y": 240,
+        "y": 160,
         "wires": [
             [
                 "9ae215cb4e377e36"
@@ -511,7 +499,7 @@
         "senderr": false,
         "headers": [],
         "x": 390,
-        "y": 300,
+        "y": 280,
         "wires": [
             [
                 "cb19acad88ea8ad8",
@@ -532,7 +520,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 300,
+        "y": 280,
         "wires": [
             [
                 "89a9d9dc6ab10b5c"
@@ -552,8 +540,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 580,
-        "y": 340,
+        "x": 620,
+        "y": 300,
         "wires": []
     },
     {
@@ -577,7 +565,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "ExtractResponse",
-        "func": "let newmsg = {};\n\nnewmsg = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\nnewmsg = newmsg[\"status\"][0];\n\nreturn newmsg;",
+        "func": "let httpStatusCode;\nlet data;\nlet comprobante;\nlet status;\nlet newmsg = {};\n\nhttpStatusCode = msg.statusCode;\ndata = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\ncomprobante = data[\"numeroComprobante\"][0];\nstatus = data[\"status\"][0];\n\nnewmsg[\"httpStatusCode\"] = httpStatusCode;\nnewmsg[\"comprobante\"] = comprobante;\nnewmsg[\"codigo\"] = status[\"Code\"][0];\nnewmsg[\"descripcion\"] = status[\"Description\"][0];\nreturn newmsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -606,8 +594,8 @@
         "phonenumberinputtypemessage": "msg",
         "inputtypemessage": "msg",
         "rejectssl": true,
-        "x": 280,
-        "y": 60,
+        "x": 220,
+        "y": 40,
         "wires": [
             [
                 "b234123a.c95f5"
@@ -683,7 +671,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 300,
+        "y": 280,
         "wires": [
             [
                 "b5bf5f268a9ed3a7"
@@ -719,7 +707,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "PutSOAP",
-        "func": "const timestamp = msg.payload[0].timestamp.toISOString().slice(0, 19) + 'Z'; //localDateTimeString = localDateTimeString.timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: \"America/Santiago\", hour12: false };\nconst date = msg.payload[0].timestamp.toLocaleDateString(\"en-GB\", options).replaceAll(\"/\", \"-\");\nconst time = msg.payload[0].timestamp.toLocaleTimeString(\"en-GB\", options);\nconst volumen_m3 = msg.payload[0].volumen_m3;\nconst flujo_L_s = (msg.payload[0].flujo_L_min/60).toFixed(2);\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1401-255</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSubterranea>\n            <aut:fechaMedicion>${date}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:totalizador>${volumen_m3}</aut:totalizador>\n            <aut:caudal>${flujo_L_s}</aut:caudal>\n            <aut:nivelFreaticoDelPozo>1.0</aut:nivelFreaticoDelPozo>\n         </aut:authDataExtraccionSubterranea>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "func": "const timestamp = msg.payload[0].timestamp.toISOString().slice(0, 19) + 'Z'; //localDateTimeString = localDateTimeString.timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: \"America/Santiago\", hour12: false };\nconst date = msg.payload[0].timestamp.toLocaleDateString(\"en-GB\", options).replaceAll(\"/\", \"-\");\nconst time = msg.payload[0].timestamp.toLocaleTimeString(\"en-GB\", options);\nconst volumen_m3 = msg.payload[0].volumen_m3;\nconst flujo_L_s = (msg.payload[0].flujo_L_min/60).toFixed(2);\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${flujo_L_s}</aut:caudal>\n            <aut:nivelFreaticoDelPozo>1.0</aut:nivelFreaticoDelPozo>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -786,5 +774,15 @@
                 "e642b7fafc2293e6"
             ]
         ]
+    },
+    {
+        "id": "6b9dcce09517d5be",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Descripcion logica",
+        "info": "Cada x minutos enviar registro mas antiguo no enviado\n\nQuedan registros por mandar?\nSi: intenta enviar\nNo: no se intenta enviar\n",
+        "x": 110,
+        "y": 220,
+        "wires": []
     }
 ]

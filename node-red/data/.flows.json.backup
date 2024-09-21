@@ -98,8 +98,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 480,
-        "y": 500,
+        "x": 400,
+        "y": 380,
         "wires": [
             [
                 "801304a26341c444"
@@ -119,8 +119,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 620,
-        "y": 500,
+        "x": 540,
+        "y": 380,
         "wires": []
     },
     {
@@ -144,85 +144,11 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 330,
-        "y": 500,
+        "x": 250,
+        "y": 380,
         "wires": [
             [
                 "fbd6fb10ebb4e77f"
-            ]
-        ]
-    },
-    {
-        "id": "f71277c148fb3424",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar estado presostato - Tabla sensor_log",
-        "query": "INSERT INTO sensor_log (time, sensor_id, measurement, status)\n    VALUES (NOW(), 3, {{{ msg.payload }}}, 'activo');",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 750,
-        "y": 420,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "7b23eb345a75abd6",
-        "type": "change",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "rules": [
-            {
-                "t": "change",
-                "p": "payload",
-                "pt": "msg",
-                "from": "true",
-                "fromt": "bool",
-                "to": "1",
-                "tot": "num"
-            },
-            {
-                "t": "change",
-                "p": "payload",
-                "pt": "msg",
-                "from": "false",
-                "fromt": "bool",
-                "to": "0",
-                "tot": "num"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 460,
-        "y": 420,
-        "wires": [
-            [
-                "f71277c148fb3424"
-            ]
-        ]
-    },
-    {
-        "id": "83cacdf41bfc6702",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbei",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload",
-        "topi": "topic",
-        "x": 290,
-        "y": 420,
-        "wires": [
-            [
-                "7b23eb345a75abd6"
             ]
         ]
     },
@@ -393,18 +319,6 @@
         ]
     },
     {
-        "id": "53b2176712387123",
-        "type": "link in",
-        "z": "f6f2187d.f17ca8",
-        "name": "link in 1",
-        "links": [],
-        "x": 585,
-        "y": 260,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "cc9d55b43af50ae2",
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
@@ -433,8 +347,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 470,
-        "y": 60,
+        "x": 410,
+        "y": 40,
         "wires": []
     },
     {
@@ -459,7 +373,7 @@
         "payload": "This is a test",
         "payloadType": "str",
         "x": 100,
-        "y": 120,
+        "y": 100,
         "wires": [
             [
                 "ab24375cb61c90bf"
@@ -480,7 +394,7 @@
         "name": "philippe.ilharreguy@gmail.com",
         "dname": "PI email",
         "x": 260,
-        "y": 120,
+        "y": 100,
         "wires": []
     },
     {
@@ -497,7 +411,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 700,
-        "y": 240,
+        "y": 160,
         "wires": []
     },
     {
@@ -513,7 +427,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 240,
+        "y": 160,
         "wires": [
             [
                 "dd90b7fa6e9340fa"
@@ -542,7 +456,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 240,
+        "y": 160,
         "wires": [
             [
                 "68926513297359aa"
@@ -558,7 +472,7 @@
         "wsdl": "22d655552657cf36",
         "method": "getDataExtraccionOp",
         "x": 510,
-        "y": 240,
+        "y": 160,
         "wires": [
             [
                 "9ae215cb4e377e36"
@@ -585,7 +499,7 @@
         "senderr": false,
         "headers": [],
         "x": 390,
-        "y": 300,
+        "y": 280,
         "wires": [
             [
                 "cb19acad88ea8ad8",
@@ -606,7 +520,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 300,
+        "y": 280,
         "wires": [
             [
                 "89a9d9dc6ab10b5c"
@@ -626,8 +540,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 580,
-        "y": 340,
+        "x": 620,
+        "y": 300,
         "wires": []
     },
     {
@@ -651,7 +565,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "ExtractResponse",
-        "func": "let newmsg = {};\n\nnewmsg = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\nnewmsg = newmsg[\"status\"][0];\n\nreturn newmsg;",
+        "func": "let comprobante;\nlet status;\nlet data;\nlet newmsg = {};\n\ndata = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\ncomprobante = data[\"numeroComprobante\"][0];\nstatus = data[\"status\"][0];\n\nnewmsg[\"comprobante\"] = comprobante;\nnewmsg[\"codigo\"] = status[\"Code\"][0];\nnewmsg[\"descripcion\"] = status[\"Description\"][0];\nreturn newmsg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -680,8 +594,8 @@
         "phonenumberinputtypemessage": "msg",
         "inputtypemessage": "msg",
         "rejectssl": true,
-        "x": 280,
-        "y": 60,
+        "x": 220,
+        "y": 40,
         "wires": [
             [
                 "b234123a.c95f5"
@@ -757,7 +671,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 300,
+        "y": 280,
         "wires": [
             [
                 "b5bf5f268a9ed3a7"
@@ -793,7 +707,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "PutSOAP",
-        "func": "const timestamp = msg.payload[0].timestamp.toISOString().slice(0, 19) + 'Z'; //localDateTimeString = localDateTimeString.timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: \"America/Santiago\", hour12: false };\nconst date = msg.payload[0].timestamp.toLocaleDateString(\"en-GB\", options).replaceAll(\"/\", \"-\");\nconst time = msg.payload[0].timestamp.toLocaleTimeString(\"en-GB\", options);\nconst volumen_m3 = msg.payload[0].volumen_m3;\nconst flujo_L_s = (msg.payload[0].flujo_L_min/60).toFixed(2);\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1401-255</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSubterranea>\n            <aut:fechaMedicion>${date}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:totalizador>${volumen_m3}</aut:totalizador>\n            <aut:caudal>${flujo_L_s}</aut:caudal>\n            <aut:nivelFreaticoDelPozo>1.0</aut:nivelFreaticoDelPozo>\n         </aut:authDataExtraccionSubterranea>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "func": "const timestamp = msg.payload[0].timestamp.toISOString().slice(0, 19) + 'Z'; //localDateTimeString = localDateTimeString.timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: \"America/Santiago\", hour12: false };\nconst date = msg.payload[0].timestamp.toLocaleDateString(\"en-GB\", options).replaceAll(\"/\", \"-\");\nconst time = msg.payload[0].timestamp.toLocaleTimeString(\"en-GB\", options);\nconst volumen_m3 = msg.payload[0].volumen_m3;\nconst flujo_L_s = (msg.payload[0].flujo_L_min/60).toFixed(2);\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${flujo_L_s}</aut:caudal>\n            <aut:nivelFreaticoDelPozo>1.0</aut:nivelFreaticoDelPozo>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -860,5 +774,15 @@
                 "e642b7fafc2293e6"
             ]
         ]
+    },
+    {
+        "id": "6b9dcce09517d5be",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Descripcion logica",
+        "info": "Cada x minutos enviar registro mas antiguo no enviado\n\nQuedan registros por mandar?\nSi: intenta enviar\nNo: no se intenta enviar\n",
+        "x": 110,
+        "y": 220,
+        "wires": []
     }
 ]
