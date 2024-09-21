@@ -114,8 +114,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 760,
-        "y": 200,
+        "x": 660,
+        "y": 260,
         "wires": [
             [
                 "801304a26341c444"
@@ -135,8 +135,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 920,
-        "y": 200,
+        "x": 800,
+        "y": 260,
         "wires": []
     },
     {
@@ -160,8 +160,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 610,
-        "y": 200,
+        "x": 510,
+        "y": 260,
         "wires": [
             [
                 "fbd6fb10ebb4e77f"
@@ -299,7 +299,7 @@
         "y": 220,
         "wires": [
             [
-                "893673ea93e0e06f"
+                "aca9796f6ef0f4e6"
             ]
         ]
     },
@@ -315,7 +315,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 320,
+        "x": 580,
         "y": 220,
         "wires": []
     },
@@ -428,6 +428,26 @@
         ]
     },
     {
+        "id": "aca9796f6ef0f4e6",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Calculo Caudal",
+        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2;      // Ancho canal m\nconst S = 0.0043;   // Pendiente canal m\nconst n = 0.01;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "893673ea93e0e06f"
+            ]
+        ]
+    },
+    {
         "id": "b234123a.c95f5",
         "type": "debug",
         "z": "c19fc8a18bff1dd0",
@@ -440,7 +460,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 510,
+        "x": 470,
         "y": 60,
         "wires": []
     },
@@ -595,7 +615,8 @@
         "y": 300,
         "wires": [
             [
-                "cb19acad88ea8ad8"
+                "cb19acad88ea8ad8",
+                "ed77c53d5e36c072"
             ]
         ]
     },
@@ -604,7 +625,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "PutSOAP",
-        "func": "\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1401-255</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>2024-01-02T14:01:00Z</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>Ck4k4l40=</aut:password>\n         </aut:authDataUsuario>\n         <!--You have a CHOICE of the next 2 items at this level-->\n         <!--Optional:-->\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>02-01-2024</aut:fechaMedicion>\n            <aut:horaMedicion>14:01:00</aut:horaMedicion>\n            <aut:caudal>10</aut:caudal>\n            <aut:alturaLimnimetrica>1</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nreturn msg;\n",
+        "func": "\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>2024-09-02T14:01:00Z</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <!--You have a CHOICE of the next 2 items at this level-->\n         <!--Optional:-->\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>02-09-2024</aut:fechaMedicion>\n            <aut:horaMedicion>14:01:00</aut:horaMedicion>\n            <aut:caudal>10</aut:caudal>\n            <aut:alturaLimnimetrica>1</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -686,7 +707,7 @@
         "phonenumberinputtypemessage": "msg",
         "inputtypemessage": "msg",
         "rejectssl": true,
-        "x": 320,
+        "x": 280,
         "y": 60,
         "wires": [
             [
