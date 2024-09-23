@@ -44,8 +44,6 @@ def connect_mqtt():
         client.connect(BROKER, PORT, 60)
     except Exception as e:
         logging.error(f"Failed to connect to MQTT broker: {e}. Will auto-reconnect.")
-        #time.sleep(5)
-        #connect_mqtt()  # Retry connection
 
 # Callback for when a message is received on the subscribed topic
 def on_message(client, userdata, msg):

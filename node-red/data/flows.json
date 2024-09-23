@@ -185,7 +185,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 580,
+        "x": 540,
         "y": 220,
         "wires": []
     },
@@ -221,7 +221,7 @@
         "type": "debug",
         "z": "f6f2187d.f17ca8",
         "name": "Broker Status Events",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -328,7 +328,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 600,
+        "x": 560,
         "y": 280,
         "wires": [
             []
@@ -845,7 +845,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 720,
+        "x": 700,
         "y": 280,
         "wires": []
     },
