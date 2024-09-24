@@ -221,7 +221,7 @@
         "type": "debug",
         "z": "f6f2187d.f17ca8",
         "name": "Broker Status Events",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -282,7 +282,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "60",
+        "repeat": "300",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -799,14 +799,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "125",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
+        "x": 110,
         "y": 280,
         "wires": [
             [
@@ -819,12 +819,12 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Hora",
-        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC\nLIMIT 1;",
+        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 280,
+        "x": 300,
         "y": 280,
         "wires": [
             [
@@ -861,11 +861,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 460,
+        "x": 480,
         "y": 280,
         "wires": [
             [
-                "7fd3ab3ed7b58461"
+                "356fa6003b59a4df"
             ]
         ]
     },
