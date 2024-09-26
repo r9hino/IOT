@@ -960,7 +960,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Update Registro",
-        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.comprobante_dga }}}'\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = {{{ msg.id_composite.id_obra }}};",
+        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.comprobante_dga }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = {{{ msg.id_composite.id_obra }}};",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
