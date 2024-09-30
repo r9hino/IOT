@@ -302,7 +302,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2;      // Ancho canal m\nconst S = 0.0043;   // Pendiente canal m\nconst n = 0.01;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\nif(h < 0) h = 0;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
+        "func": "let x = msg.payload.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2.8;      // Ancho canal m\nconst S = 0.001;   // Pendiente canal m\nconst n = 0.0125;     // Rugosidad pared canal\n\n// Calcular profundidad\nlet h = h_max*(x - 0.6)/2.4;\nif(h < 0) h = 0;\n\n// Calcular Area\nlet A = w*h;\n\n// Velocidad promedio agua\nlet R = A/(2*h+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\nmsg.payload = {voltaje: x, profundidad: h, velocidad: V, caudal: Q};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -810,7 +810,8 @@
         "y": 280,
         "wires": [
             [
-                "ad01ed3eca76398e"
+                "ad01ed3eca76398e",
+                "234f2217f7419470"
             ]
         ]
     },
@@ -864,7 +865,9 @@
         "x": 480,
         "y": 280,
         "wires": [
-            []
+            [
+                "7fd3ab3ed7b58461"
+            ]
         ]
     },
     {
@@ -958,7 +961,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Update Registro",
-        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.comprobante_dga }}}'\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = {{{ msg.id_composite.id_obra }}};",
+        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.comprobante_dga }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = {{{ msg.id_composite.id_obra }}};",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -968,5 +971,40 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "234f2217f7419470",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Registros Pendientes",
+        "query": "select count(*) AS registros_pendientes\nfrom registros_hora\nwhere \"estado_dga\" = 'enviado - ok';",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 460,
+        "y": 400,
+        "wires": [
+            [
+                "2cd964c87b09a7be"
+            ]
+        ]
+    },
+    {
+        "id": "2cd964c87b09a7be",
+        "type": "debug",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Registros pendientes",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "payload[0]",
+        "statusType": "msg",
+        "x": 700,
+        "y": 400,
+        "wires": []
     }
 ]
