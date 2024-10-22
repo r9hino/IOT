@@ -22,7 +22,8 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 try:
     i2c = busio.I2C(board.SCL, board.SDA)
     ads = ADS.ADS1115(i2c)
-    channel = AnalogIn(ads, ADS.P0)
+    channel_A0 = AnalogIn(ads, ADS.P0)  # A0
+    channel_A1 = AnalogIn(ads, ADS.P1)  # A1
 except Exception as e:
     logging.error(f"Failed to initialize I2C or ADS1115: {e}")
     raise SystemExit
@@ -31,8 +32,14 @@ except Exception as e:
 def read_sensor():
     try:
         return {
-            "analog_value": channel.value,
-            "voltage": channel.voltage
+            "A0": {
+                "analog_value": channel_A0.value,
+                "voltage": channel_A0.voltage
+            },
+            "A1": {
+                "analog_value": channel_A1.value,
+                "voltage": channel_A1.voltage
+            }
         }
     except Exception as e:
         logging.error(f"Error reading from sensor: {e}")
