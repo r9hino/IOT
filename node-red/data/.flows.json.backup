@@ -166,7 +166,7 @@
         "rh": 0,
         "inputs": 0,
         "x": 120,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "aca9796f6ef0f4e6"
@@ -187,7 +187,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 540,
-        "y": 280,
+        "y": 300,
         "wires": []
     },
     {
@@ -303,7 +303,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "let voltaje_caudal = msg.payload.A0.voltage;\nlet voltaje_nivel = msg.payload.A1.voltage;\n\n// Convertir voltaje a profundidad\n/* \n    V = 4mA * 150ohm = 0.6V\n    V = 20mA * 150ohm = 3.0V\n    \n    0.6V -> 0m\n      x  -> h\n    3.0V -> h_max (max profundidad) m\n    (h_max - 0)/(3 - 0.6) = (h - 0)/(x - 0.6)\n    h = h_max*(x - 0.6)/2.4\n*/\nconst h_max = 2;      // Profundidad maxima detectada por sensor m\nconst w = 2.8;        // Ancho canal m\nconst S = 0.001;      // Pendiente canal m\nconst n = 0.0125;     // Rugosidad pared canal\n\n// Calcular profundidad en sensor caudal.\nlet h_caudal = h_max*(voltaje_caudal - 0.6)/2.4;\nif(h_caudal < 0) h_caudal = 0;\n\n// Calcular Area\nlet A = w*h_caudal;\n\n// Velocidad promedio agua\nlet R = A/(2*h_caudal+w);\nlet V = R**(2/3)*S**(1/2)/n;\n\n// Caudal canal\nlet Q = A*V;\n\n// Calcular profundidad en sensor nivel.\nlet h_nivel = h_max*(voltaje_nivel - 0.6)/2.4;\nif(h_nivel < 0) h_nivel = 0;\n\nmsg.payload = {\n  voltaje_caudal: voltaje_caudal,\n  profundidad_caudal: h_caudal,\n  velocidad: V,\n  caudal: Q,\n  voltaje_nivel: voltaje_nivel,\n  profundidad_nivel: h_nivel};\n\nreturn msg;",
+        "func": "let v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\n\n// Convertir voltaje a profundidad\n// Sensor aforado - Ver excel Monitoreo Caudal DGA Bocatoma Don Walterio\nlet h_caudal = (0.75 - 0.3) / (1.19 - 0.872) * (v_nivel_aforador -0.872)+0.3;\nif(h_caudal < 0) h_caudal = 0;\n\n// Caudal canal segun curva carga Ernesto Gesche\nlet Q = -0.04977+1.175132*h_caudal+3.99181*h_caudal*h_caudal;\nif (Q < 0) Q = 0;\n\n// Calcular profundidad nivel rio.\nlet h_nivel_rio = (0.2 - 0.11) / (0.95 - 0.88) * (v_nivel_rio - 0.88)+0.11;\nif (h_nivel_rio < 0) h_nivel_rio = 0;\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_caudal,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -311,7 +311,7 @@
         "finalize": "",
         "libs": [],
         "x": 340,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "cc9d55b43af50ae2",
@@ -324,13 +324,13 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro",
-        "query": "INSERT INTO registros (fecha_hora, id_obra, profundidad, velocidad, caudal)\n    VALUES (NOW(), 1, {{{ msg.payload.profundidad_caudal }}}, {{{ msg.payload.velocidad }}},\n    {{{ msg.payload.caudal }}});",
+        "query": "INSERT INTO registros (fecha_hora, id_obra, nivel_limnimetrico, caudal)\n    VALUES (NOW(), 1, {{{ msg.payload.h_nivel_rio }}},\n    {{{ msg.payload.caudal }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 560,
-        "y": 340,
+        "y": 360,
         "wires": [
             []
         ]
@@ -339,10 +339,20 @@
         "id": "7e5414a1f36aa5d0",
         "type": "comment",
         "z": "f6f2187d.f17ca8",
-        "name": "Solcitud a script de Python para obtener datos de sensores",
+        "name": "Solcitud a script de Python via MQTT para obtener datos de sensores",
+        "info": "",
+        "x": 270,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "8d9d8c4c386abdd8",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Respuesta script Python via MQTT con dato de sensores",
         "info": "",
         "x": 230,
-        "y": 160,
+        "y": 260,
         "wires": []
     },
     {
