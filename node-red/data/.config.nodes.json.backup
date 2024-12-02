@@ -559,25 +559,6 @@
             }
         }
     },
-    "@redplc/node-red-rpi-ads1115": {
-        "name": "@redplc/node-red-rpi-ads1115",
-        "version": "2.0.8",
-        "local": true,
-        "user": true,
-        "nodes": {
-            "redplc-ads1115": {
-                "name": "redplc-ads1115",
-                "types": [
-                    "redplc-ads1115"
-                ],
-                "enabled": true,
-                "local": true,
-                "user": false,
-                "module": "@redplc/node-red-rpi-ads1115",
-                "file": "/data/node_modules/@redplc/node-red-rpi-ads1115/nodes/redplc-ads1115.js"
-            }
-        }
-    },
     "node-red-contrib-aedes": {
         "name": "node-red-contrib-aedes",
         "version": "0.13.0",

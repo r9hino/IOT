@@ -7,7 +7,7 @@
 #
 #   Docker commands example
 #     Build custom-node-red image: docker build . -t custom-node-red
-#     docker run -p 51880:1880 -v /home/pi/IOT/node-red/data:/data --name nodered custom-node-red
+#     docker run -p 51880:1880 -v /home/pi/IOT-Docker-Script/node-red/data:/data --name nodered custom-node-red
 ################################################################################
 
 services:
@@ -68,8 +68,6 @@ services:
     environment:
       - POSTGRES_USERNAME=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PLC_PRIVATE_IP=${PLC_PRIVATE_IP}
-      - PLC_PORT=${PLC_PORT}
       - PHONE_NUMBER_1=${PHONE_NUMBER_1}
       - PHONE_NUMBER_2=${PHONE_NUMBER_2}
     depends_on:

@@ -1,7 +1,7 @@
 {
     "node-red": {
         "name": "node-red",
-        "version": "4.0.2",
+        "version": "4.0.5",
         "local": false,
         "user": false,
         "nodes": {
@@ -429,9 +429,9 @@
     },
     "node-red-configurable-ping": {
         "name": "node-red-configurable-ping",
-        "version": "1.0.1",
-        "local": true,
-        "user": true,
+        "version": "1.0.2",
+        "local": false,
+        "user": false,
         "nodes": {
             "file-function": {
                 "name": "file-function",
@@ -439,18 +439,18 @@
                     "conf ping"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-configurable-ping",
-                "file": "/data/node_modules/node-red-configurable-ping/advanced-ping/advanced-ping.js"
+                "file": "/usr/src/node-red/node_modules/node-red-configurable-ping/advanced-ping/advanced-ping.js"
             }
         }
     },
     "node-red-contrib-s7": {
         "name": "node-red-contrib-s7",
         "version": "3.1.0",
-        "local": true,
-        "user": true,
+        "local": false,
+        "user": false,
         "nodes": {
             "s7": {
                 "name": "s7",
@@ -461,18 +461,18 @@
                     "s7 control"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-contrib-s7",
-                "file": "/data/node_modules/node-red-contrib-s7/red/s7.js"
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-s7/red/s7.js"
             }
         }
     },
     "node-red-node-email": {
         "name": "node-red-node-email",
-        "version": "2.1.0",
-        "local": true,
-        "user": true,
+        "version": "3.0.2",
+        "local": false,
+        "user": false,
         "nodes": {
             "email": {
                 "name": "email",
@@ -482,18 +482,18 @@
                     "e-mail mta"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-node-email",
-                "file": "/data/node_modules/node-red-node-email/61-email.js"
+                "file": "/usr/src/node-red/node_modules/node-red-node-email/61-email.js"
             }
         }
     },
     "node-red-contrib-whatsapp-cmb": {
         "name": "node-red-contrib-whatsapp-cmb",
         "version": "1.0.3",
-        "local": true,
-        "user": true,
+        "local": false,
+        "user": false,
         "nodes": {
             "whatsapp": {
                 "name": "whatsapp",
@@ -502,18 +502,18 @@
                     "node-red-contrib-whatsapp-cmb-send-message"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-contrib-whatsapp-cmb",
-                "file": "/data/node_modules/node-red-contrib-whatsapp-cmb/nodes/whatsapp.js"
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-whatsapp-cmb/nodes/whatsapp.js"
             }
         }
     },
     "node-red-contrib-postgresql": {
         "name": "node-red-contrib-postgresql",
-        "version": "0.14.0",
-        "local": true,
-        "user": true,
+        "version": "0.14.2",
+        "local": false,
+        "user": false,
         "nodes": {
             "postgresql": {
                 "name": "postgresql",
@@ -522,18 +522,18 @@
                     "postgresql"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-contrib-postgresql",
-                "file": "/data/node_modules/node-red-contrib-postgresql/postgresql.js"
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-postgresql/postgresql.js"
             }
         }
     },
     "node-red-contrib-soap-plus": {
         "name": "node-red-contrib-soap-plus",
         "version": "1.2.0",
-        "local": true,
-        "user": true,
+        "local": false,
+        "user": false,
         "nodes": {
             "soap": {
                 "name": "soap",
@@ -541,10 +541,10 @@
                     "soap request plus"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-contrib-soap-plus",
-                "file": "/data/node_modules/node-red-contrib-soap-plus/soap-node-plus.js"
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-soap-plus/soap-node-plus.js"
             },
             "soap-config-plus": {
                 "name": "soap-config-plus",
@@ -552,18 +552,18 @@
                     "soap-config-plus"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-contrib-soap-plus",
-                "file": "/data/node_modules/node-red-contrib-soap-plus/soap-config-plus.js"
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-soap-plus/soap-config-plus.js"
             }
         }
     },
     "node-red-contrib-aedes": {
         "name": "node-red-contrib-aedes",
-        "version": "0.13.0",
-        "local": true,
-        "user": true,
+        "version": "0.13.2",
+        "local": false,
+        "user": false,
         "nodes": {
             "aedes-mqtt-broker": {
                 "name": "aedes-mqtt-broker",
@@ -571,10 +571,10 @@
                     "aedes broker"
                 ],
                 "enabled": true,
-                "local": true,
+                "local": false,
                 "user": false,
                 "module": "node-red-contrib-aedes",
-                "file": "/data/node_modules/node-red-contrib-aedes/aedes.js"
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-aedes/aedes.js"
             }
         }
     }
