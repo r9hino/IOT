@@ -68,6 +68,7 @@ services:
     environment:
       - POSTGRES_USERNAME=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DGA_CODIGO=${DGA_CODIGO}
       - PHONE_NUMBER_1=${PHONE_NUMBER_1}
       - PHONE_NUMBER_2=${PHONE_NUMBER_2}
     depends_on:

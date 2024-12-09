@@ -99,7 +99,7 @@
         "finalize": "",
         "libs": [],
         "x": 400,
-        "y": 440,
+        "y": 500,
         "wires": [
             [
                 "801304a26341c444"
@@ -120,7 +120,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 540,
-        "y": 440,
+        "y": 500,
         "wires": []
     },
     {
@@ -145,7 +145,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 250,
-        "y": 440,
+        "y": 500,
         "wires": [
             [
                 "fbd6fb10ebb4e77f"
@@ -178,15 +178,15 @@
         "type": "debug",
         "z": "f6f2187d.f17ca8",
         "name": "debug 11",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
+        "x": 560,
         "y": 300,
         "wires": []
     },
@@ -303,7 +303,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "let v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\n\n// Convertir voltaje a profundidad\n// Sensor aforado - Ver excel Monitoreo Caudal DGA Bocatoma Don Walterio\nlet h_nivel_aforador = (0.75 - 0.3) / (1.19 - 0.872) * (v_nivel_aforador -0.872)+0.3;\nif (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n// Caudal canal segun curva carga Ernesto Gesche\nlet Q = -0.06618 + 1.02186 * h_nivel_aforador + 1.3391 * h_nivel_aforador * h_nivel_aforador;\nif (Q < 0) Q = 0;\n\n// Calcular profundidad nivel rio.\nlet h_nivel_rio = (0.2 - 0.11) / (0.95 - 0.88) * (v_nivel_rio - 0.88)+0.11;\nif (h_nivel_rio < 0) h_nivel_rio = 0;\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
+        "func": "let v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\n\n// Si la corriente es menor a 4mA o voltaje leido en sensor de aforador es \n// menor a 0.6V (4mA * 150Ohm) hay un problema en el sensor, alimentacion de sensor,\n// cable, terminales o tarjeta conversora de corriente a voltaje.\nif(v_nivel_aforador < 0.5){\n  msg.sensor_status = \"error\";\n  msg.payload = \"Posible problema con sensor, conexion o tarjeta.\";\n  return msg;\n}\n\n// Convertir voltaje a profundidad\n// Sensor aforado - Ver excel Monitoreo Caudal DGA Bocatoma Don Walterio\nlet h_nivel_aforador = (0.21 - 0.0) / (0.855 - 0.6) * (v_nivel_aforador - 0.6)+0.0;\nif (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n// Caudal canal segun curva carga Ernesto Gesche\nlet Q = -0.06618 + 1.02186 * h_nivel_aforador + 1.3391 * h_nivel_aforador * h_nivel_aforador;\nif (Q < 0) Q = 0;\n\n// Calcular profundidad nivel rio.\nlet h_nivel_rio = (0.21 - 0.0) / (0.855 - 0.6) * (v_nivel_rio - 0.6)+0.0;\nif (h_nivel_rio < 0) h_nivel_rio = 0;\n\nmsg.sensor_status = \"ok\";\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -314,8 +314,8 @@
         "y": 300,
         "wires": [
             [
-                "cc9d55b43af50ae2",
-                "893673ea93e0e06f"
+                "893673ea93e0e06f",
+                "cb9939cec12d3f14"
             ]
         ]
     },
@@ -329,8 +329,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 560,
-        "y": 360,
+        "x": 580,
+        "y": 340,
         "wires": [
             []
         ]
@@ -354,6 +354,75 @@
         "x": 230,
         "y": 260,
         "wires": []
+    },
+    {
+        "id": "cb9939cec12d3f14",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Check Sensor Status",
+        "property": "sensor_status",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "ok",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "error",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 360,
+        "y": 340,
+        "wires": [
+            [
+                "cc9d55b43af50ae2"
+            ],
+            [
+                "fbb8cb6a345fcb16"
+            ]
+        ]
+    },
+    {
+        "id": "806a832b1788d2bc",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar log evento",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'error',\n    '{{{ msg.payload }}}');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 710,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fbb8cb6a345fcb16",
+        "type": "rbe",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 550,
+        "y": 400,
+        "wires": [
+            [
+                "806a832b1788d2bc"
+            ]
+        ]
     },
     {
         "id": "b234123a.c95f5",
@@ -875,7 +944,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "PutSOAP",
-        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif(msg.payload[0] === undefined){\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_mm = (msg.payload[0].avg_nivel_aforador*1000).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms,\n   id_obra: msg.payload[0].id_obra\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time, caudal: caudal_L_s};\nreturn msg;\n*/\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-534</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp_no_ms}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date_local}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${caudal_L_s}</aut:caudal>\n            <aut:alturaLimnimetrica>${profundidad_mm}</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nmsg.soap_request = msg.payload;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif(msg.payload[0] === undefined){\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nlet dga_codigo = env.get('DGA_CODIGO')\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_mm = (msg.payload[0].avg_nivel_aforador*1000).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms,\n   id_obra: msg.payload[0].id_obra\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time, caudal: caudal_L_s};\nreturn msg;\n*/\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>${dga_codigo}</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp_no_ms}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date_local}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${caudal_L_s}</aut:caudal>\n            <aut:alturaLimnimetrica>${profundidad_mm}</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nmsg.soap_request = msg.payload;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
