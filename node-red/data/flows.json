@@ -398,7 +398,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 710,
+        "x": 590,
         "y": 400,
         "wires": [
             []
@@ -416,13 +416,33 @@
         "septopics": true,
         "property": "payload",
         "topi": "topic",
-        "x": 550,
+        "x": 390,
         "y": 400,
         "wires": [
             [
                 "806a832b1788d2bc"
             ]
         ]
+    },
+    {
+        "id": "7c4b9669afa86c17",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Si no hubo error",
+        "info": "",
+        "x": 760,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "f290fc6df20a1b94",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Si hubo error",
+        "info": "",
+        "x": 770,
+        "y": 400,
+        "wires": []
     },
     {
         "id": "b234123a.c95f5",
@@ -589,7 +609,7 @@
         "senderr": false,
         "headers": [],
         "x": 390,
-        "y": 520,
+        "y": 680,
         "wires": [
             [
                 "cb19acad88ea8ad8",
@@ -610,7 +630,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 520,
+        "y": 680,
         "wires": [
             [
                 "89a9d9dc6ab10b5c"
@@ -631,7 +651,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 620,
-        "y": 540,
+        "y": 700,
         "wires": []
     },
     {
@@ -643,7 +663,7 @@
         "attr": "",
         "chr": "",
         "x": 230,
-        "y": 580,
+        "y": 740,
         "wires": [
             [
                 "5ad961939d054b56"
@@ -663,7 +683,7 @@
         "finalize": "",
         "libs": [],
         "x": 390,
-        "y": 580,
+        "y": 740,
         "wires": [
             [
                 "ed77c53d5e36c072"
@@ -693,53 +713,6 @@
         ]
     },
     {
-        "id": "157118029ffcacde",
-        "type": "inject",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 100,
-        "y": 640,
-        "wires": [
-            [
-                "923a6d21aa518c7a"
-            ]
-        ]
-    },
-    {
-        "id": "923a6d21aa518c7a",
-        "type": "postgresql",
-        "z": "c19fc8a18bff1dd0",
-        "name": "Query Flujo L/min - Volumen m3",
-        "query": "WITH \nsensor1 AS (\n    SELECT time,\n    measurement \n    FROM sensor_log \n    WHERE sensor_id = 1 \n    ORDER BY time DESC \n    LIMIT 1\n),\nsensor2 AS (\n    SELECT measurement \n    FROM sensor_log \n    WHERE sensor_id = 2 \n    ORDER BY time DESC \n    LIMIT 1\n)\nSELECT\n\tsensor1.time as timestamp,\n\tTO_CHAR(sensor1.time, 'DD-MM-YYYY') AS date,\n    TO_CHAR(sensor1.time, 'HH24:MI:SS') AS time,\n    sensor1.measurement AS \"flujo_L_min\", \n    sensor2.measurement AS volumen_m3\nFROM sensor1, sensor2",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 310,
-        "y": 640,
-        "wires": [
-            [
-                "c7ccf197ba79aba1"
-            ]
-        ]
-    },
-    {
         "id": "244baeffbb9733b7",
         "type": "inject",
         "z": "c19fc8a18bff1dd0",
@@ -761,107 +734,10 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 520,
+        "y": 680,
         "wires": [
             [
                 "b5bf5f268a9ed3a7"
-            ]
-        ]
-    },
-    {
-        "id": "aa1abbf650e2eec6",
-        "type": "http request",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "method": "POST",
-        "ret": "txt",
-        "paytoqs": "ignore",
-        "url": "https://snia.mop.gob.cl/controlextraccion/datosExtraccion/SendDataExtraccionService",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 670,
-        "y": 640,
-        "wires": [
-            [
-                "a06a4d89b48eebd0"
-            ]
-        ]
-    },
-    {
-        "id": "c7ccf197ba79aba1",
-        "type": "function",
-        "z": "c19fc8a18bff1dd0",
-        "name": "PutSOAP",
-        "func": "const timestamp = msg.payload[0].timestamp.toISOString().slice(0, 19) + 'Z'; //localDateTimeString = localDateTimeString.timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: \"America/Santiago\", hour12: false };\nconst date = msg.payload[0].timestamp.toLocaleDateString(\"en-GB\", options).replaceAll(\"/\", \"-\");\nconst time = msg.payload[0].timestamp.toLocaleTimeString(\"en-GB\", options);\nconst volumen_m3 = msg.payload[0].volumen_m3;\nconst flujo_L_s = (msg.payload[0].flujo_L_min/60).toFixed(2);\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${flujo_L_s}</aut:caudal>\n            <aut:nivelFreaticoDelPozo>1.0</aut:nivelFreaticoDelPozo>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 520,
-        "y": 640,
-        "wires": [
-            [
-                "aa1abbf650e2eec6"
-            ]
-        ]
-    },
-    {
-        "id": "e642b7fafc2293e6",
-        "type": "debug",
-        "z": "c19fc8a18bff1dd0",
-        "name": "debug 8",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 680,
-        "y": 700,
-        "wires": []
-    },
-    {
-        "id": "a06a4d89b48eebd0",
-        "type": "xml",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "property": "payload",
-        "attr": "",
-        "chr": "",
-        "x": 350,
-        "y": 700,
-        "wires": [
-            [
-                "aa3a6b3239d373ef"
-            ]
-        ]
-    },
-    {
-        "id": "aa3a6b3239d373ef",
-        "type": "function",
-        "z": "c19fc8a18bff1dd0",
-        "name": "ExtractResponse",
-        "func": "let newmsg = {};\n\nnewmsg = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\nnewmsg = newmsg[\"status\"][0];\n\nreturn newmsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 510,
-        "y": 700,
-        "wires": [
-            [
-                "e642b7fafc2293e6"
             ]
         ]
     },
@@ -935,8 +811,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 700,
-        "y": 280,
+        "x": 320,
+        "y": 400,
         "wires": []
     },
     {
@@ -951,8 +827,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 500,
-        "y": 280,
+        "x": 80,
+        "y": 340,
         "wires": [
             [
                 "7fd3ab3ed7b58461"
@@ -975,7 +851,7 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 230,
+        "x": 350,
         "y": 340,
         "wires": [
             [
@@ -991,7 +867,7 @@
         "property": "payload",
         "attr": "",
         "chr": "",
-        "x": 370,
+        "x": 490,
         "y": 340,
         "wires": [
             [
@@ -1011,12 +887,13 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 530,
-        "y": 340,
+        "x": 110,
+        "y": 400,
         "wires": [
             [
                 "635fa7ee3059fb8c",
-                "356fa6003b59a4df"
+                "356fa6003b59a4df",
+                "1e5180b8a60ac9d0"
             ]
         ]
     },
@@ -1037,7 +914,7 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 90,
+        "x": 210,
         "y": 340,
         "wires": [
             [
@@ -1055,8 +932,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 720,
-        "y": 340,
+        "x": 340,
+        "y": 520,
         "wires": [
             [
                 "234f2217f7419470"
@@ -1073,8 +950,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 460,
-        "y": 400,
+        "x": 560,
+        "y": 520,
         "wires": [
             [
                 "2cd964c87b09a7be"
@@ -1094,8 +971,113 @@
         "targetType": "msg",
         "statusVal": "payload[0]",
         "statusType": "msg",
-        "x": 700,
+        "x": 800,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "120c1fefba4f8be0",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Si hubo error",
+        "info": "",
+        "x": 770,
         "y": 400,
+        "wires": []
+    },
+    {
+        "id": "bf9a568f9ee01888",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Insertar log evento",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'error',\n    'Error al enviar datos a la DGA');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 590,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1e5180b8a60ac9d0",
+        "type": "rbe",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload[\"estado_dga\"]",
+        "topi": "topic",
+        "x": 310,
+        "y": 460,
+        "wires": [
+            [
+                "13665b127de89330"
+            ]
+        ]
+    },
+    {
+        "id": "13665b127de89330",
+        "type": "switch",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "property": "payload[\"estado_dga\"]",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "enviado - error",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "enviado - ok",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 430,
+        "y": 460,
+        "wires": [
+            [
+                "bf9a568f9ee01888"
+            ],
+            [
+                "d516e0c90551f04a"
+            ]
+        ]
+    },
+    {
+        "id": "d516e0c90551f04a",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Insertar log evento",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'info',\n    'Enviando datos a la DGA');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 590,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2b8d50855463e1e6",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "No hubo error",
+        "info": "",
+        "x": 770,
+        "y": 460,
         "wires": []
     }
 ]
