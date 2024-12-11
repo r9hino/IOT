@@ -330,7 +330,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 580,
-        "y": 340,
+        "y": 360,
         "wires": [
             []
         ]
@@ -378,7 +378,7 @@
         "repair": false,
         "outputs": 2,
         "x": 360,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "cc9d55b43af50ae2"
@@ -393,13 +393,13 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'error',\n    '{{{ msg.payload }}}');",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    '{{{ msg.payload }}}');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 590,
-        "y": 400,
+        "y": 420,
         "wires": [
             []
         ]
@@ -417,7 +417,7 @@
         "property": "payload",
         "topi": "topic",
         "x": 390,
-        "y": 400,
+        "y": 420,
         "wires": [
             [
                 "806a832b1788d2bc"
@@ -431,7 +431,7 @@
         "name": "Si no hubo error",
         "info": "",
         "x": 760,
-        "y": 340,
+        "y": 360,
         "wires": []
     },
     {
@@ -441,7 +441,7 @@
         "name": "Si hubo error",
         "info": "",
         "x": 770,
-        "y": 400,
+        "y": 420,
         "wires": []
     },
     {
@@ -990,7 +990,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'error',\n    'Error al enviar datos a la DGA');",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Warning',\n    'Problema al enviar datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -1011,7 +1011,7 @@
         "start": "",
         "inout": "out",
         "septopics": true,
-        "property": "payload",
+        "property": "payload[\"estado_dga\"]",
         "topi": "topic",
         "x": 310,
         "y": 460,
@@ -1059,7 +1059,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'info',\n    'Enviando datos a la DGA');",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Info',\n    'Enviando datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
