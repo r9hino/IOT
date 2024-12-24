@@ -303,7 +303,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ir sensor aforador, AI1 sensor rio.\n*/\n\nlet v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\nlet h_nivel_aforador;\nlet h_nivel_rio;\nlet Q;\nmsg.sensors_status = '';\n\n// Si la corriente es menor a 4mA o voltaje leido en sensor de aforador es \n// menor a 0.6V (4mA * 150Ohm) hay un problema en el sensor, alimentacion de sensor,\n// cable, terminales o tarjeta conversora de corriente a voltaje.\n//if(v_nivel_aforador < 0.5 && v_nivel_rio < 0.5){\n//  msg.sensors_status = \"AI0 error - AI1 error\";\n//  msg.payload = \"Señales en AI0 y AI1 no detectadas, posible problema con tarjeta interfaz o alimentacion.\";\n//  return msg;\n//}\n\n// Medicion AI0 con error\nif (v_nivel_aforador < 0.5) {\n  msg.sensors_status = \"AI0 error\";\n  //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n  msg.sensors_status = \"AI0 ok\";\n\n  // Calcular profundidad nivel rio segun voltajes\n  h_nivel_aforador = (0.21 - 0.0) / (0.855 - 0.6) * (v_nivel_aforador - 0.6) + 0.0;\n  if (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n  // Caudal canal segun curva carga\n  Q = -0.06618 + 1.02186 * h_nivel_aforador + 1.3391 * h_nivel_aforador * h_nivel_aforador;\n  if (Q < 0) Q = 0;\n}\n\n// Medicion AI1 con error\nif (v_nivel_rio < 0.5) {\n  if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 error\";\n  else if(msg.sensors_status == 'AI0 error') msg.sensors_status = \"AI0 error - AI1 error\";\n  //msg.payload = \"Señal en AI1 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI2 ok\nelse{\n  if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 ok\";\n  else if (msg.sensors_status == \"AI0 error\") msg.sensors_status = \"AI0 error - AI1 ok\";\n\n  // Calcular profundidad nivel rio segun voltajes\n  h_nivel_rio = (0.21 - 0.0) / (0.855 - 0.6) * (v_nivel_rio - 0.6) + 0.0;\n  if (h_nivel_rio < 0) h_nivel_rio = 0;\n}\n\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
+        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ir sensor aforador, AI1 sensor rio.\n*/\n\nlet v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\nlet h_nivel_aforador;\nlet h_nivel_rio;\nlet Q;\nmsg.sensors_status = '';\n\n// Si la corriente es menor a 4mA o voltaje leido en sensor de aforador es \n// menor a 0.6V (4mA * 150Ohm) hay un problema en el sensor, alimentacion de sensor,\n// cable, terminales o tarjeta conversora de corriente a voltaje.\n//if(v_nivel_aforador < 0.5 && v_nivel_rio < 0.5){\n//  msg.sensors_status = \"AI0 error - AI1 error\";\n//  msg.payload = \"Señales en AI0 y AI1 no detectadas, posible problema con tarjeta interfaz o alimentacion.\";\n//  return msg;\n//}\n\n// Medicion AI0 con error\nif (v_nivel_aforador < 0.5) {\n  msg.sensors_status = \"AI0 error\";\n  //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n  msg.sensors_status = \"AI0 ok\";\n\n  // Calcular profundidad nivel rio segun voltajes\n  h_nivel_aforador = (2 - 0.0) / (3 - 0.6) * (v_nivel_aforador - 0.6) + 0.0;\n  if (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n  // Caudal canal segun curva carga\n  Q = -0.06618 + 1.02186 * h_nivel_aforador + 1.3391 * h_nivel_aforador * h_nivel_aforador;\n  if (Q < 0) Q = 0;\n}\n\n// Medicion AI1 con error\nif (v_nivel_rio < 0.5) {\n  if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 error\";\n  else if(msg.sensors_status == 'AI0 error') msg.sensors_status = \"AI0 error - AI1 error\";\n  //msg.payload = \"Señal en AI1 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI2 ok\nelse{\n  if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 ok\";\n  else if (msg.sensors_status == \"AI0 error\") msg.sensors_status = \"AI0 error - AI1 ok\";\n\n  // Calcular profundidad nivel rio segun voltajes\n  h_nivel_rio = (0.21 - 0.0) / (0.855 - 0.6) * (v_nivel_rio - 0.6) + 0.0;\n  if (h_nivel_rio < 0) h_nivel_rio = 0;\n}\n\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -474,7 +474,7 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Warning',\n    'Sensores AI0 ok y AI1 con error.');",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Sensores AI0 ok y AI1 con error.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -788,7 +788,7 @@
         "senderr": false,
         "headers": [],
         "x": 390,
-        "y": 680,
+        "y": 800,
         "wires": [
             [
                 "cb19acad88ea8ad8",
@@ -809,7 +809,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 680,
+        "y": 800,
         "wires": [
             [
                 "89a9d9dc6ab10b5c"
@@ -830,7 +830,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 620,
-        "y": 700,
+        "y": 820,
         "wires": []
     },
     {
@@ -842,7 +842,7 @@
         "attr": "",
         "chr": "",
         "x": 230,
-        "y": 740,
+        "y": 860,
         "wires": [
             [
                 "5ad961939d054b56"
@@ -862,7 +862,7 @@
         "finalize": "",
         "libs": [],
         "x": 390,
-        "y": 740,
+        "y": 860,
         "wires": [
             [
                 "ed77c53d5e36c072"
@@ -913,7 +913,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 680,
+        "y": 800,
         "wires": [
             [
                 "b5bf5f268a9ed3a7"
@@ -944,14 +944,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "127",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
+        "x": 110,
         "y": 280,
         "wires": [
             [
@@ -990,7 +990,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 320,
+        "x": 380,
         "y": 400,
         "wires": []
     },
@@ -1059,7 +1059,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "ExtractResponse",
-        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n}\ncatch (error) {\n    new_payload[\"estado_dga\"] = 'enviado - error';\n    new_payload[\"comprobante_dga\"] = 0;\n    msg.payload = new_payload;\n    return msg;\n}\n\nnew_payload[\"httpStatusCode\"] = httpStatusCode;\nnew_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\nstatus = soap_data[\"status\"][0];\nnew_payload[\"codigo_dga\"] = status[\"Code\"][0];\nnew_payload[\"descripcion\"] = status[\"Description\"][0];\n\nif (new_payload[\"codigo_dga\"] == 0){\n    new_payload[\"estado_dga\"] = 'enviado - ok';\n}\nelse{\n    new_payload[\"estado_dga\"] = 'enviado - error';\n}\n\nmsg.payload = new_payload;\nreturn msg;",
+        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\nlet error_counter = context.get('error_counter') || 0;\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n    new_payload[\"httpStatusCode\"] = httpStatusCode;\n    new_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\n    status = soap_data[\"status\"][0];\n    new_payload[\"codigo_dga\"] = status[\"Code\"][0];\n    new_payload[\"descripcion\"] = status[\"Description\"][0];\n\n    if (new_payload[\"codigo_dga\"] == 0){\n        new_payload[\"estado_dga\"] = 'enviado - ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Codigo DGA distinto de cero\";\n}\ncatch (error) {    \n    context.set('error_counter', error_counter + 1);\n    \n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 5){\n        new_payload[\"estado_dga\"] = 'enviado - error';\n    }\n\n    new_payload[\"comprobante_dga\"] = 0;\n}\n\nmsg.payload = new_payload;\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -1070,9 +1070,8 @@
         "y": 400,
         "wires": [
             [
-                "635fa7ee3059fb8c",
                 "356fa6003b59a4df",
-                "1e5180b8a60ac9d0"
+                "13665b127de89330"
             ]
         ]
     },
@@ -1111,8 +1110,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 340,
-        "y": 520,
+        "x": 540,
+        "y": 560,
         "wires": [
             [
                 "234f2217f7419470"
@@ -1129,8 +1128,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 560,
-        "y": 520,
+        "x": 460,
+        "y": 620,
         "wires": [
             [
                 "2cd964c87b09a7be"
@@ -1150,8 +1149,8 @@
         "targetType": "msg",
         "statusVal": "payload[0]",
         "statusType": "msg",
-        "x": 800,
-        "y": 520,
+        "x": 720,
+        "y": 620,
         "wires": []
     },
     {
@@ -1160,8 +1159,8 @@
         "z": "c19fc8a18bff1dd0",
         "name": "Si hubo error",
         "info": "",
-        "x": 770,
-        "y": 400,
+        "x": 730,
+        "y": 440,
         "wires": []
     },
     {
@@ -1169,13 +1168,13 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Warning',\n    'Problema al enviar datos a la DGA.');",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Problema al enviar datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 590,
-        "y": 400,
+        "x": 550,
+        "y": 440,
         "wires": [
             []
         ]
@@ -1192,11 +1191,12 @@
         "septopics": true,
         "property": "payload[\"estado_dga\"]",
         "topi": "topic",
-        "x": 310,
-        "y": 460,
+        "x": 370,
+        "y": 440,
         "wires": [
             [
-                "13665b127de89330"
+                "bf9a568f9ee01888",
+                "635fa7ee3059fb8c"
             ]
         ]
     },
@@ -1222,14 +1222,15 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 430,
+        "x": 150,
         "y": 460,
         "wires": [
             [
-                "bf9a568f9ee01888"
+                "1e5180b8a60ac9d0"
             ],
             [
-                "d516e0c90551f04a"
+                "d5e2fe3b1185a55e",
+                "635fa7ee3059fb8c"
             ]
         ]
     },
@@ -1243,8 +1244,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 590,
-        "y": 460,
+        "x": 550,
+        "y": 500,
         "wires": [
             []
         ]
@@ -1255,8 +1256,28 @@
         "z": "c19fc8a18bff1dd0",
         "name": "No hubo error",
         "info": "",
-        "x": 770,
-        "y": 460,
+        "x": 730,
+        "y": 500,
         "wires": []
+    },
+    {
+        "id": "d5e2fe3b1185a55e",
+        "type": "rbe",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload[\"estado_dga\"]",
+        "topi": "topic",
+        "x": 370,
+        "y": 480,
+        "wires": [
+            [
+                "d516e0c90551f04a"
+            ]
+        ]
     }
 ]
