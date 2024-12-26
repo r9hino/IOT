@@ -12,8 +12,7 @@ Gateway for IOT application using Docker containers: timescaleDB, node-red, Graf
 ## Setting up the gateway
 ### Get project repository from Github
 1. Use pi as default user, then go to home directory
-2. Clone repository: ```git clone https://github.com/r9hino/IOT-Docker-Script.git```
-3. Change folder name from IOT-Docker-Script to IOT: ```mv IOT-Docker-Script IOT```
+2. Clone repository: ```git clone https://github.com/r9hino/IOT.git```
 
 ### Containers initialization with docker compose
 1. Go to project folder: ```cd /home/pi/IOT```
@@ -34,6 +33,7 @@ Gateway for IOT application using Docker containers: timescaleDB, node-red, Graf
     - Install python libraries on this virtual environment: ```pip3 install adafruit-circuitpython-ads1x15 RPi.GPIO paho-mqtt```
     - Deactivate virtual environment: ```diactivate```
 8. Add python script to system services:
+    - Check that I2C interface board is connected before, otherwise an error running python_i2c_mqtt.service will occur.
     - Copy service: cp /home/pi/IOT/python_i2c_mqtt.service /etc/systemd/system/python_i2c_mqtt.service
     - Initialize service:
         * sudo systemctl daemon-reload
