@@ -990,7 +990,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 380,
+        "x": 360,
         "y": 400,
         "wires": []
     },
@@ -1110,7 +1110,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 540,
+        "x": 520,
         "y": 560,
         "wires": [
             [
@@ -1128,8 +1128,8 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 460,
-        "y": 620,
+        "x": 740,
+        "y": 560,
         "wires": [
             [
                 "2cd964c87b09a7be"
@@ -1159,7 +1159,7 @@
         "z": "c19fc8a18bff1dd0",
         "name": "Si hubo error",
         "info": "",
-        "x": 730,
+        "x": 710,
         "y": 440,
         "wires": []
     },
@@ -1173,7 +1173,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 550,
+        "x": 530,
         "y": 440,
         "wires": [
             []
@@ -1191,7 +1191,7 @@
         "septopics": true,
         "property": "payload[\"estado_dga\"]",
         "topi": "topic",
-        "x": 370,
+        "x": 350,
         "y": 440,
         "wires": [
             [
@@ -1244,7 +1244,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 550,
+        "x": 530,
         "y": 500,
         "wires": [
             []
@@ -1256,7 +1256,7 @@
         "z": "c19fc8a18bff1dd0",
         "name": "No hubo error",
         "info": "",
-        "x": 730,
+        "x": 710,
         "y": 500,
         "wires": []
     },
@@ -1272,7 +1272,7 @@
         "septopics": true,
         "property": "payload[\"estado_dga\"]",
         "topi": "topic",
-        "x": 370,
+        "x": 350,
         "y": 480,
         "wires": [
             [
