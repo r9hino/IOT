@@ -9,7 +9,7 @@
     {
         "id": "c19fc8a18bff1dd0",
         "type": "tab",
-        "label": "Notifications",
+        "label": "Data Publication",
         "disabled": false,
         "info": "",
         "env": []
@@ -169,7 +169,7 @@
         "y": 300,
         "wires": [
             [
-                "aca9796f6ef0f4e6"
+                "3eb7a816c89b1833"
             ]
         ]
     },
@@ -186,7 +186,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 560,
+        "x": 520,
         "y": 300,
         "wires": []
     },
@@ -293,44 +293,9 @@
         "x": 110,
         "y": 200,
         "wires": [
-            []
-        ]
-    },
-    {
-        "id": "aca9796f6ef0f4e6",
-        "type": "function",
-        "z": "f6f2187d.f17ca8",
-        "name": "Calculo Caudal",
-        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ir sensor aforador, AI1 sensor rio.\n*/\n\nlet v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\nlet h_nivel_aforador;\nlet h_nivel_rio;\nlet Q;\nmsg.sensors_status = '';\n\n// Si la corriente es menor a 4mA o voltaje leido en sensor de aforador es \n// menor a 0.6V (4mA * 150Ohm) hay un problema en el sensor, alimentacion de sensor,\n// cable, terminales o tarjeta conversora de corriente a voltaje.\n//if(v_nivel_aforador < 0.5 && v_nivel_rio < 0.5){\n//  msg.sensors_status = \"AI0 error - AI1 error\";\n//  msg.payload = \"Señales en AI0 y AI1 no detectadas, posible problema con tarjeta interfaz o alimentacion.\";\n//  return msg;\n//}\n\n// Medicion AI0 con error\nif (v_nivel_aforador < 0.5) {\n  msg.sensors_status = \"AI0 error\";\n  //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n  msg.sensors_status = \"AI0 ok\";\n\n  // Calcular profundidad nivel rio segun voltajes\n  h_nivel_aforador = (2 - 0.0) / (3 - 0.6) * (v_nivel_aforador - 0.6) + 0.0;\n  if (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n  // Caudal canal segun curva carga\n  Q = -0.06618 + 1.02186 * h_nivel_aforador + 1.3391 * h_nivel_aforador * h_nivel_aforador;\n  if (Q < 0) Q = 0;\n}\n\n// Medicion AI1 con error\nif (v_nivel_rio < 0.5) {\n  if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 error\";\n  else if(msg.sensors_status == 'AI0 error') msg.sensors_status = \"AI0 error - AI1 error\";\n  //msg.payload = \"Señal en AI1 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI2 ok\nelse{\n  if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 ok\";\n  else if (msg.sensors_status == \"AI0 error\") msg.sensors_status = \"AI0 error - AI1 ok\";\n\n  // Calcular profundidad nivel rio segun voltajes\n  h_nivel_rio = (0.21 - 0.0) / (0.855 - 0.6) * (v_nivel_rio - 0.6) + 0.0;\n  if (h_nivel_rio < 0) h_nivel_rio = 0;\n}\n\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 340,
-        "y": 300,
-        "wires": [
             [
-                "893673ea93e0e06f",
-                "cb9939cec12d3f14"
+                "5646bff859abac17"
             ]
-        ]
-    },
-    {
-        "id": "cc9d55b43af50ae2",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar registro",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_aforador,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    1,\n    {{{ msg.payload.h_nivel_aforador }}},\n    {{{ msg.payload.h_nivel_rio }}},\n    {{{ msg.payload.caudal }}});",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 580,
-        "y": 360,
-        "wires": [
-            []
         ]
     },
     {
@@ -354,272 +319,24 @@
         "wires": []
     },
     {
-        "id": "cb9939cec12d3f14",
-        "type": "switch",
+        "id": "3eb7a816c89b1833",
+        "type": "function",
         "z": "f6f2187d.f17ca8",
-        "name": "Check Sensors Status",
-        "property": "sensors_status",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "AI0 ok - AI1 ok",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "AI0 ok - AI1 error",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "AI0 error - AI1 ok",
-                "vt": "str"
-            },
-            {
-                "t": "eq",
-                "v": "AI0 error - AI1 error",
-                "vt": "str"
-            }
-        ],
-        "checkall": "false",
-        "repair": false,
-        "outputs": 4,
-        "x": 300,
-        "y": 520,
+        "name": "Calculo Caudal",
+        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n*/\n\nlet v_potencia_rhom = msg.payload.A0.voltage;\nlet v_potencia_pehui = msg.payload.A1.voltage;\n\nlet Q_rhom;\nlet Q_pehui;\nmsg.sensors_status = '';\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (v_potencia_rhom < 0.5) {\n    msg.sensors_status = \"AI0 error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    msg.sensors_status = \"AI0 ok\";\n\n    // Calcular caudal Rhom.\n    Q_rhom = v_potencia_rhom*250;\n}\n\n// Medicion AI1 con error\nif (v_potencia_pehui < 0.5) {\n    if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 error\";\n    else if(msg.sensors_status == 'AI0 error') msg.sensors_status = \"AI0 error - AI1 error\";\n    //msg.payload = \"Señal en AI1 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI2 ok\nelse{\n    if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 ok\";\n    else if (msg.sensors_status == \"AI0 error\") msg.sensors_status = \"AI0 error - AI1 ok\";\n\n    // Calcular caudal Pehui.\n    Q_rhom = v_potencia_pehui*250;\n}\n\nmsg.payload = {\n    v_potencia_rhom: v_potencia_rhom,\n    v_potencia_pehui: v_potencia_pehui,\n    caudal_rhom: Q_rhom,\n    caudal_pehui: Q_pehui\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 300,
         "wires": [
             [
-                "cc9d55b43af50ae2",
-                "fbb8cb6a345fcb16"
-            ],
-            [
-                "e9b44f1554831495",
-                "e83b0bdea9460b7e"
-            ],
-            [
-                "9b6d4c82b9fbfae3",
-                "2d6451217a839fa1"
-            ],
-            [
-                "d370cfe850661090"
+                "893673ea93e0e06f"
             ]
         ]
-    },
-    {
-        "id": "806a832b1788d2bc",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Info',\n    'Sensores AI0 ok y AI1 ok.');",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 710,
-        "y": 420,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "fbb8cb6a345fcb16",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "sensors_status",
-        "topi": "topic",
-        "x": 550,
-        "y": 420,
-        "wires": [
-            [
-                "806a832b1788d2bc"
-            ]
-        ]
-    },
-    {
-        "id": "7c4b9669afa86c17",
-        "type": "comment",
-        "z": "f6f2187d.f17ca8",
-        "name": "Sensores AI0 ok y AI1 ok.",
-        "info": "",
-        "x": 790,
-        "y": 360,
-        "wires": []
-    },
-    {
-        "id": "e9b44f1554831495",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar registro",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_aforador,\n    caudal)\n    VALUES (NOW(), \n    1,\n    {{{ msg.payload.h_nivel_aforador }}},\n    {{{ msg.payload.caudal }}});",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 580,
-        "y": 480,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "13a179d8fadae9f7",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Sensores AI0 ok y AI1 con error.');",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 710,
-        "y": 540,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "e83b0bdea9460b7e",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "sensors_status",
-        "topi": "topic",
-        "x": 550,
-        "y": 540,
-        "wires": [
-            [
-                "13a179d8fadae9f7"
-            ]
-        ]
-    },
-    {
-        "id": "9b6d4c82b9fbfae3",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar registro",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico)\n    VALUES (NOW(), \n    1,\n    {{{ msg.payload.h_nivel_rio }}});",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 580,
-        "y": 600,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "900c81dded15c8e1",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Sensores AI0 con error y AI1 ok.');",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 710,
-        "y": 660,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "2d6451217a839fa1",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "sensors_status",
-        "topi": "topic",
-        "x": 550,
-        "y": 660,
-        "wires": [
-            [
-                "900c81dded15c8e1"
-            ]
-        ]
-    },
-    {
-        "id": "3d0549b015dcaca6",
-        "type": "postgresql",
-        "z": "f6f2187d.f17ca8",
-        "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    '{{{ Sensores AI0 con error y AI1 con error. }}}');",
-        "postgreSQLConfig": "b23d8359c5c9ebfb",
-        "split": false,
-        "rowsPerMsg": 1,
-        "outputs": 1,
-        "x": 710,
-        "y": 720,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "d370cfe850661090",
-        "type": "rbe",
-        "z": "f6f2187d.f17ca8",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "sensors_status",
-        "topi": "topic",
-        "x": 550,
-        "y": 720,
-        "wires": [
-            [
-                "3d0549b015dcaca6"
-            ]
-        ]
-    },
-    {
-        "id": "d70221df9bc26792",
-        "type": "comment",
-        "z": "f6f2187d.f17ca8",
-        "name": "Sensores AI0 ok y AI1 con error.",
-        "info": "",
-        "x": 810,
-        "y": 480,
-        "wires": []
-    },
-    {
-        "id": "00f47499516a0d61",
-        "type": "comment",
-        "z": "f6f2187d.f17ca8",
-        "name": "Sensores AI0 con error y AI1 ok.",
-        "info": "",
-        "x": 810,
-        "y": 600,
-        "wires": []
-    },
-    {
-        "id": "ad5c0a9667af641d",
-        "type": "comment",
-        "z": "f6f2187d.f17ca8",
-        "name": "Sensores AI0 con error y AI1 con error.",
-        "info": "",
-        "x": 970,
-        "y": 720,
-        "wires": []
     },
     {
         "id": "b234123a.c95f5",

@@ -169,7 +169,7 @@
         "y": 300,
         "wires": [
             [
-                "893673ea93e0e06f"
+                "3eb7a816c89b1833"
             ]
         ]
     },
@@ -186,7 +186,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 420,
+        "x": 520,
         "y": 300,
         "wires": []
     },
@@ -317,6 +317,26 @@
         "x": 230,
         "y": 260,
         "wires": []
+    },
+    {
+        "id": "3eb7a816c89b1833",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Calculo Caudal",
+        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n*/\n\nlet v_potencia_rhom = msg.payload.A0.voltage;\nlet v_potencia_pehui = msg.payload.A1.voltage;\n\nlet Q_rhom;\nlet Q_pehui;\nmsg.sensors_status = '';\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (v_potencia_rhom < 0.5) {\n    msg.sensors_status = \"AI0 error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    msg.sensors_status = \"AI0 ok\";\n\n    // Calcular caudal Rhom.\n    Q_rhom = v_potencia_rhom*250;\n}\n\n// Medicion AI1 con error\nif (v_potencia_pehui < 0.5) {\n    if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 error\";\n    else if(msg.sensors_status == 'AI0 error') msg.sensors_status = \"AI0 error - AI1 error\";\n    //msg.payload = \"Señal en AI1 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI2 ok\nelse{\n    if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 ok\";\n    else if (msg.sensors_status == \"AI0 error\") msg.sensors_status = \"AI0 error - AI1 ok\";\n\n    // Calcular caudal Pehui.\n    Q_rhom = v_potencia_pehui*250;\n}\n\nmsg.payload = {\n    v_potencia_rhom: v_potencia_rhom,\n    v_potencia_pehui: v_potencia_pehui,\n    caudal_rhom: Q_rhom,\n    caudal_pehui: Q_pehui\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 300,
+        "wires": [
+            [
+                "893673ea93e0e06f"
+            ]
+        ]
     },
     {
         "id": "b234123a.c95f5",
@@ -639,14 +659,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "127",
+        "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 110,
+        "x": 100,
         "y": 280,
         "wires": [
             [
