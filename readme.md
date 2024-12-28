@@ -12,8 +12,7 @@ Gateway for IOT application using Docker containers: timescaleDB, node-red, Graf
 ## Setting up the gateway
 ### Get project repository from Github
 1. Use pi as default user, then go to home directory
-2. Clone repository: ```git clone https://github.com/r9hino/IOT-Docker-Script.git```
-3. Change folder name from IOT-Docker-Script to IOT: ```mv IOT-Docker-Script IOT```
+2. Clone repository: ```git clone https://github.com/r9hino/IOT.git```
 
 ### Containers initialization with docker compose
 1. Go to project folder: ```cd /home/pi/IOT```
@@ -50,7 +49,7 @@ Gateway for IOT application using Docker containers: timescaleDB, node-red, Graf
 4. Run containers: ```docker compose up -d```
 
 ## Github commands
-1. Clone repository: ```git clone -b main https://github.com/r9hino/ACM.git```
+1. Clone repository: ```git clone -b main https://github.com/r9hino/IOT.git```
 2. Github commit:
     * ```git add .```
     * ```git commit -m "Description"```
