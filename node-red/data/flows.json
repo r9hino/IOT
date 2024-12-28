@@ -990,7 +990,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 360,
+        "x": 340,
         "y": 400,
         "wires": []
     },
@@ -1059,7 +1059,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "ExtractResponse",
-        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\nlet error_counter = context.get('error_counter') || 0;\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n    new_payload[\"httpStatusCode\"] = httpStatusCode;\n    new_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\n    status = soap_data[\"status\"][0];\n    new_payload[\"codigo_dga\"] = status[\"Code\"][0];\n    new_payload[\"descripcion\"] = status[\"Description\"][0];\n\n    if (new_payload[\"codigo_dga\"] == 0){\n        new_payload[\"estado_dga\"] = 'enviado - ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Codigo DGA distinto de cero\";\n}\ncatch (error) {    \n    context.set('error_counter', error_counter + 1);\n    \n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 5){\n        new_payload[\"estado_dga\"] = 'enviado - error';\n    }\n\n    new_payload[\"comprobante_dga\"] = 0;\n}\n\nmsg.payload = new_payload;\nreturn msg;",
+        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\nlet error_counter = context.get('error_counter') || 0;\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    // Se asume que envio esta ok hasta que hayan 5 o mas errores.\n    new_payload[\"estado_dga\"] = 'enviado - ok';\n\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n    new_payload[\"httpStatusCode\"] = httpStatusCode;\n    new_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\n    status = soap_data[\"status\"][0];\n    new_payload[\"codigo_dga\"] = status[\"Code\"][0];\n    new_payload[\"descripcion\"] = status[\"Description\"][0];\n\n    if (new_payload[\"codigo_dga\"] == 0) context.set('error_counter', 0);\n    else throw \"Codigo DGA distinto de cero\";\n}\ncatch (error) {    \n    context.set('error_counter', error_counter + 1);\n\n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 5){\n        new_payload[\"estado_dga\"] = 'enviado - error';\n    }\n\n    new_payload[\"comprobante_dga\"] = 0;\n}\n\nmsg.payload = new_payload;\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -1071,7 +1071,8 @@
         "wires": [
             [
                 "356fa6003b59a4df",
-                "13665b127de89330"
+                "1e5180b8a60ac9d0",
+                "635fa7ee3059fb8c"
             ]
         ]
     },
@@ -1110,7 +1111,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 520,
+        "x": 360,
         "y": 560,
         "wires": [
             [
@@ -1128,7 +1129,7 @@
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 740,
+        "x": 580,
         "y": 560,
         "wires": [
             [
@@ -1149,8 +1150,8 @@
         "targetType": "msg",
         "statusVal": "payload[0]",
         "statusType": "msg",
-        "x": 720,
-        "y": 620,
+        "x": 820,
+        "y": 560,
         "wires": []
     },
     {
@@ -1159,7 +1160,7 @@
         "z": "c19fc8a18bff1dd0",
         "name": "Si hubo error",
         "info": "",
-        "x": 710,
+        "x": 790,
         "y": 440,
         "wires": []
     },
@@ -1167,13 +1168,13 @@
         "id": "bf9a568f9ee01888",
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
-        "name": "Insertar log evento",
+        "name": "Insertar error log",
         "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Problema al enviar datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 530,
+        "x": 620,
         "y": 440,
         "wires": [
             []
@@ -1191,12 +1192,11 @@
         "septopics": true,
         "property": "payload[\"estado_dga\"]",
         "topi": "topic",
-        "x": 350,
-        "y": 440,
+        "x": 330,
+        "y": 460,
         "wires": [
             [
-                "bf9a568f9ee01888",
-                "635fa7ee3059fb8c"
+                "13665b127de89330"
             ]
         ]
     },
@@ -1222,15 +1222,14 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 150,
+        "x": 450,
         "y": 460,
         "wires": [
             [
-                "1e5180b8a60ac9d0"
+                "bf9a568f9ee01888"
             ],
             [
-                "d5e2fe3b1185a55e",
-                "635fa7ee3059fb8c"
+                "d516e0c90551f04a"
             ]
         ]
     },
@@ -1238,13 +1237,13 @@
         "id": "d516e0c90551f04a",
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
-        "name": "Insertar log evento",
+        "name": "Insertar info log",
         "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Info',\n    'Enviando datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 530,
+        "x": 620,
         "y": 500,
         "wires": [
             []
@@ -1256,28 +1255,8 @@
         "z": "c19fc8a18bff1dd0",
         "name": "No hubo error",
         "info": "",
-        "x": 710,
+        "x": 790,
         "y": 500,
         "wires": []
-    },
-    {
-        "id": "d5e2fe3b1185a55e",
-        "type": "rbe",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "func": "rbe",
-        "gap": "",
-        "start": "",
-        "inout": "out",
-        "septopics": true,
-        "property": "payload[\"estado_dga\"]",
-        "topi": "topic",
-        "x": 350,
-        "y": 480,
-        "wires": [
-            [
-                "d516e0c90551f04a"
-            ]
-        ]
     }
 ]
