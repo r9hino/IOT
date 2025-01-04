@@ -733,104 +733,6 @@
         ]
     },
     {
-        "id": "89a9d9dc6ab10b5c",
-        "type": "http request",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "method": "POST",
-        "ret": "txt",
-        "paytoqs": "ignore",
-        "url": "https://snia.mop.gob.cl/controlextraccion/datosExtraccion/SendDataExtraccionService",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [],
-        "x": 390,
-        "y": 800,
-        "wires": [
-            [
-                "cb19acad88ea8ad8",
-                "ed77c53d5e36c072"
-            ]
-        ]
-    },
-    {
-        "id": "b5bf5f268a9ed3a7",
-        "type": "function",
-        "z": "c19fc8a18bff1dd0",
-        "name": "PutSOAP",
-        "func": "\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>OB-1402-497</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>2024-09-02T14:01:00Z</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <!--You have a CHOICE of the next 2 items at this level-->\n         <!--Optional:-->\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>02-09-2024</aut:fechaMedicion>\n            <aut:horaMedicion>14:01:00</aut:horaMedicion>\n            <aut:caudal>10</aut:caudal>\n            <aut:alturaLimnimetrica>1</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 240,
-        "y": 800,
-        "wires": [
-            [
-                "89a9d9dc6ab10b5c"
-            ]
-        ]
-    },
-    {
-        "id": "ed77c53d5e36c072",
-        "type": "debug",
-        "z": "c19fc8a18bff1dd0",
-        "name": "debug 6",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 620,
-        "y": 820,
-        "wires": []
-    },
-    {
-        "id": "cb19acad88ea8ad8",
-        "type": "xml",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "property": "payload",
-        "attr": "",
-        "chr": "",
-        "x": 230,
-        "y": 860,
-        "wires": [
-            [
-                "5ad961939d054b56"
-            ]
-        ]
-    },
-    {
-        "id": "5ad961939d054b56",
-        "type": "function",
-        "z": "c19fc8a18bff1dd0",
-        "name": "ExtractResponse",
-        "func": "let httpStatusCode;\nlet data;\nlet comprobante;\nlet status;\nlet newmsg = {};\n\nhttpStatusCode = msg.statusCode;\ndata = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\ncomprobante = data[\"numeroComprobante\"][0];\nstatus = data[\"status\"][0];\n\nnewmsg[\"httpStatusCode\"] = httpStatusCode;\nnewmsg[\"comprobante\"] = comprobante;\nnewmsg[\"codigo\"] = status[\"Code\"][0];\nnewmsg[\"descripcion\"] = status[\"Description\"][0];\nreturn newmsg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 390,
-        "y": 860,
-        "wires": [
-            [
-                "ed77c53d5e36c072"
-            ]
-        ]
-    },
-    {
         "id": "fcb51e4af2e157b9",
         "type": "node-red-contrib-whatsapp-cmb-send-message",
         "z": "c19fc8a18bff1dd0",
@@ -849,35 +751,6 @@
         "wires": [
             [
                 "b234123a.c95f5"
-            ]
-        ]
-    },
-    {
-        "id": "244baeffbb9733b7",
-        "type": "inject",
-        "z": "c19fc8a18bff1dd0",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 100,
-        "y": 800,
-        "wires": [
-            [
-                "b5bf5f268a9ed3a7"
             ]
         ]
     },
@@ -925,7 +798,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Hora",
-        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
+        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'Enviado ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -960,7 +833,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "PutSOAP",
-        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif(msg.payload[0] === undefined){\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nlet dga_codigo = env.get('DGA_CODIGO')\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_mm = (msg.payload[0].avg_nivel_aforador*1000).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms,\n   id_obra: msg.payload[0].id_obra\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time, caudal: caudal_L_s};\nreturn msg;\n*/\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>${dga_codigo}</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp_no_ms}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date_local}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${caudal_L_s}</aut:caudal>\n            <aut:alturaLimnimetrica>${profundidad_mm}</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nmsg.soap_request = msg.payload;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif(msg.payload[0] === undefined){\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nlet dga_codigo = env.get('DGA_CODIGO_RHOM')\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_mm = (msg.payload[0].avg_nivel_aforador*1000).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms,\n   id_obra: msg.payload[0].id_obra\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time, caudal: caudal_L_s};\nreturn msg;\n*/\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>${dga_codigo}</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp_no_ms}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date_local}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${caudal_L_s}</aut:caudal>\n            <aut:alturaLimnimetrica>${profundidad_mm}</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nmsg.soap_request = msg.payload;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -1084,7 +957,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Pendientes",
-        "query": "select count(*) AS registros_pendientes\nfrom registros_hora\nwhere \"estado_dga\" <> 'enviado - ok';",
+        "query": "select count(*) AS registros_pendientes\nfrom registros_hora\nwhere \"estado_dga\" <> 'Enviado ok';",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -1118,9 +991,9 @@
         "id": "120c1fefba4f8be0",
         "type": "comment",
         "z": "c19fc8a18bff1dd0",
-        "name": "Si hubo error",
+        "name": "Error",
         "info": "",
-        "x": 710,
+        "x": 690,
         "y": 440,
         "wires": []
     },
@@ -1128,13 +1001,13 @@
         "id": "bf9a568f9ee01888",
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
-        "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Problema al enviar datos a la DGA.');",
+        "name": "Insertar log error",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    {{{ msg.id_composite.id_obra }}},\n    'Error',\n    'Problema al enviar datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 530,
+        "x": 520,
         "y": 440,
         "wires": [
             []
@@ -1199,13 +1072,13 @@
         "id": "d516e0c90551f04a",
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
-        "name": "Insertar log evento",
-        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Info',\n    'Enviando datos a la DGA.');",
+        "name": "Insertar log info",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    {{{ msg.id_composite.id_obra }}},\n    'Info',\n    'Enviando datos a la DGA.');",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 530,
+        "x": 520,
         "y": 500,
         "wires": [
             []
@@ -1215,9 +1088,9 @@
         "id": "2b8d50855463e1e6",
         "type": "comment",
         "z": "c19fc8a18bff1dd0",
-        "name": "No hubo error",
+        "name": "Ok",
         "info": "",
-        "x": 710,
+        "x": 690,
         "y": 500,
         "wires": []
     },
@@ -1238,6 +1111,356 @@
         "wires": [
             [
                 "d516e0c90551f04a"
+            ]
+        ]
+    },
+    {
+        "id": "55bde7de14427a05",
+        "type": "inject",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 680,
+        "wires": [
+            [
+                "398998db87436301"
+            ]
+        ]
+    },
+    {
+        "id": "398998db87436301",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Query Registros Hora",
+        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 2\nAND estado_dga <> 'Enviado ok'\nORDER BY bucket ASC;",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 300,
+        "y": 680,
+        "wires": [
+            [
+                "f8bc2af073ac5d75"
+            ]
+        ]
+    },
+    {
+        "id": "8e966c356adfb669",
+        "type": "debug",
+        "z": "c19fc8a18bff1dd0",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "f8bc2af073ac5d75",
+        "type": "function",
+        "z": "c19fc8a18bff1dd0",
+        "name": "PutSOAP",
+        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif(msg.payload[0] === undefined){\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nlet dga_codigo = env.get('DGA_CODIGO_PEHUI')\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_mm = (msg.payload[0].avg_nivel_aforador*1000).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms,\n   id_obra: msg.payload[0].id_obra\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time, caudal: caudal_L_s};\nreturn msg;\n*/\n\nmsg.headers = {\n    'Content-Type': 'text/xml;charset=UTF-8',\n    'SOAPAction': 'http://www.mop.cl/controlextraccion/wsdl/datosExtraccion/authSendDataExtraccionOp',\n    'Host': 'snia.mop.gob.cl'\n};\n\nmsg.payload = \n`<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:aut=\"http://www.mop.cl/controlextraccion/xsd/datosExtraccion/AuthSendDataExtraccionRequest\">\n   <soapenv:Header>\n      <aut:authSendDataExtraccionTraza>\n         <aut:codigoDeLaObra>${dga_codigo}</aut:codigoDeLaObra>\n         <aut:timeStampOrigen>${timestamp_no_ms}</aut:timeStampOrigen>\n      </aut:authSendDataExtraccionTraza>\n   </soapenv:Header>\n   <soapenv:Body>\n      <aut:authSendDataExtraccionRequest>\n         <aut:authDataUsuario>\n            <aut:idUsuario>\n               <aut:rut>16338539-2</aut:rut>\n            </aut:idUsuario>\n            <aut:password>MkMKg69nO2</aut:password>\n         </aut:authDataUsuario>\n         <aut:authDataExtraccionSuperficial>\n            <aut:fechaMedicion>${date_local}</aut:fechaMedicion>\n            <aut:horaMedicion>${time}</aut:horaMedicion>\n            <aut:caudal>${caudal_L_s}</aut:caudal>\n            <aut:alturaLimnimetrica>${profundidad_mm}</aut:alturaLimnimetrica>\n         </aut:authDataExtraccionSuperficial>\n      </aut:authSendDataExtraccionRequest>\n   </soapenv:Body>\n</soapenv:Envelope>`;\n\nmsg.soap_request = msg.payload;\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 80,
+        "y": 740,
+        "wires": [
+            [
+                "63403dda0e28d170"
+            ]
+        ]
+    },
+    {
+        "id": "dc292778a855f48b",
+        "type": "http request",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://snia.mop.gob.cl/controlextraccion/datosExtraccion/SendDataExtraccionService",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 350,
+        "y": 740,
+        "wires": [
+            [
+                "a56dcdfc9566aab5"
+            ]
+        ]
+    },
+    {
+        "id": "a56dcdfc9566aab5",
+        "type": "xml",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 490,
+        "y": 740,
+        "wires": [
+            [
+                "943985c7bcfe0be4"
+            ]
+        ]
+    },
+    {
+        "id": "943985c7bcfe0be4",
+        "type": "function",
+        "z": "c19fc8a18bff1dd0",
+        "name": "ExtractResponse",
+        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\nlet error_counter = context.get('error_counter') || 0;\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n    new_payload[\"httpStatusCode\"] = httpStatusCode;\n    new_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\n    status = soap_data[\"status\"][0];\n    new_payload[\"codigo_dga\"] = status[\"Code\"][0];\n    new_payload[\"descripcion\"] = status[\"Description\"][0];\n\n    if (new_payload[\"codigo_dga\"] == 0){\n        new_payload[\"estado_dga\"] = 'Enviado ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Codigo DGA distinto de cero\";\n}\ncatch (error) {    \n    context.set('error_counter', error_counter + 1);\n    \n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 5){\n        new_payload[\"estado_dga\"] = 'Error en enviado';\n    }\n\n    new_payload[\"comprobante_dga\"] = 0;\n}\n\nmsg.payload = new_payload;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 110,
+        "y": 800,
+        "wires": [
+            [
+                "8e966c356adfb669",
+                "fa74ad60d0f0b375"
+            ]
+        ]
+    },
+    {
+        "id": "63403dda0e28d170",
+        "type": "switch",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "No data to send",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 210,
+        "y": 740,
+        "wires": [
+            [
+                "dc292778a855f48b"
+            ]
+        ]
+    },
+    {
+        "id": "944b32bd8dbe2b7f",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Update Registro",
+        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.comprobante_dga }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = {{{ msg.id_composite.id_obra }}};",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 520,
+        "y": 960,
+        "wires": [
+            [
+                "2564a378fdba5f6a"
+            ]
+        ]
+    },
+    {
+        "id": "2564a378fdba5f6a",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Query Registros Pendientes",
+        "query": "select count(*) AS registros_pendientes\nfrom registros_hora\nwhere \"estado_dga\" <> 'Enviado ok';",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 740,
+        "y": 960,
+        "wires": [
+            [
+                "df6af12664e1cd86"
+            ]
+        ]
+    },
+    {
+        "id": "df6af12664e1cd86",
+        "type": "debug",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Registros pendientes",
+        "active": true,
+        "tosidebar": false,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "payload[0]",
+        "statusType": "msg",
+        "x": 720,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "b0fea990885c1b68",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Error",
+        "info": "",
+        "x": 690,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "17bcb642acd02819",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Insertar log error",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    {{{ msg.id_composite.id_obra }}},\n    'Error',\n    'Problema al enviar datos de Pehui a la DGA.');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 520,
+        "y": 840,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5058e0baeafe2820",
+        "type": "rbe",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload[\"estado_dga\"]",
+        "topi": "topic",
+        "x": 350,
+        "y": 840,
+        "wires": [
+            [
+                "17bcb642acd02819",
+                "944b32bd8dbe2b7f"
+            ]
+        ]
+    },
+    {
+        "id": "fa74ad60d0f0b375",
+        "type": "switch",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "property": "payload[\"estado_dga\"]",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Error en enviado",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Enviado ok",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 150,
+        "y": 860,
+        "wires": [
+            [
+                "5058e0baeafe2820"
+            ],
+            [
+                "43a92626dff400ac",
+                "944b32bd8dbe2b7f"
+            ]
+        ]
+    },
+    {
+        "id": "2c960ec55b95010b",
+        "type": "postgresql",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Insertar log info",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    {{{ msg.id_composite.id_obra }}},\n    'Info',\n    'Enviando datos de Pehui a la DGA.');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 520,
+        "y": 900,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ade9ccf62212e499",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Ok",
+        "info": "",
+        "x": 690,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "43a92626dff400ac",
+        "type": "rbe",
+        "z": "c19fc8a18bff1dd0",
+        "name": "",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload[\"estado_dga\"]",
+        "topi": "topic",
+        "x": 350,
+        "y": 880,
+        "wires": [
+            [
+                "2c960ec55b95010b"
             ]
         ]
     }
