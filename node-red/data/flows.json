@@ -177,7 +177,7 @@
         "id": "893673ea93e0e06f",
         "type": "debug",
         "z": "f6f2187d.f17ca8",
-        "name": "debug 11",
+        "name": "debug 1",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -186,8 +186,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 520,
-        "y": 300,
+        "x": 360,
+        "y": 320,
         "wires": []
     },
     {
@@ -323,19 +323,265 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n*/\n\nlet v_potencia_rhom = msg.payload.A0.voltage;\nlet v_potencia_pehui = msg.payload.A1.voltage;\n\nlet Q_rhom;\nlet Q_pehui;\nmsg.sensors_status = '';\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (v_potencia_rhom < 0.5) {\n    msg.sensors_status = \"AI0 error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    msg.sensors_status = \"AI0 ok\";\n\n    // Calcular caudal Rhom.\n    Q_rhom = v_potencia_rhom*250;\n}\n\n// Medicion AI1 con error\nif (v_potencia_pehui < 0.5) {\n    if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 error\";\n    else if(msg.sensors_status == 'AI0 error') msg.sensors_status = \"AI0 error - AI1 error\";\n    //msg.payload = \"Señal en AI1 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI2 ok\nelse{\n    if(msg.sensors_status == 'AI0 ok') msg.sensors_status = \"AI0 ok - AI1 ok\";\n    else if (msg.sensors_status == \"AI0 error\") msg.sensors_status = \"AI0 error - AI1 ok\";\n\n    // Calcular caudal Pehui.\n    Q_rhom = v_potencia_pehui*250;\n}\n\nmsg.payload = {\n    v_potencia_rhom: v_potencia_rhom,\n    v_potencia_pehui: v_potencia_pehui,\n    caudal_rhom: Q_rhom,\n    caudal_pehui: Q_pehui\n};\n\nreturn msg;",
+        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n*/\n\nlet AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.A0.voltage,\n    nivel_limnimetrico: 0,\n    caudal: 0,\n    sensor_status: null\n};\n\nlet AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.A1.voltage,\n    nivel_limnimetrico: 0,\n    caudal: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (AI0.voltaje_potencia < 0.5) {\n    AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    AI0.sensor_status = \"Ok\";\n\n    // Calcular caudal Rhom.\n    AI0.caudal = AI0.voltaje_potencia*250;\n}\n\n// Medicion AI1 con error\nif (AI1.voltaje_potencia < 0.5) {\n    AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    AI1.sensor_status = \"Ok\";\n\n    // Calcular caudal Rhom.\n    AI1.caudal = AI1.voltaje_potencia*250;\n}\n\nlet payload = {};\npayload[\"AI0\"] = AI0;\npayload[\"AI1\"] = AI1;\n\nmsg.payload = payload;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 340,
-        "y": 300,
+        "x": 140,
+        "y": 380,
         "wires": [
             [
-                "893673ea93e0e06f"
+                "893673ea93e0e06f",
+                "4946d3f5dd275c08",
+                "a7b53b36ed38903a"
             ]
+        ]
+    },
+    {
+        "id": "4946d3f5dd275c08",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Check AI0 status",
+        "property": "payload.AI0.sensor_status",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Ok",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Error",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 350,
+        "y": 380,
+        "wires": [
+            [
+                "7ed6f2b351432dc7",
+                "31e89ae3f4fed3a6"
+            ],
+            [
+                "0b8999ac3911ae51"
+            ]
+        ]
+    },
+    {
+        "id": "32667a9d7b3dc322",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar log",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Info',\n    'Sensor AI0 ok.');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 770,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "56a4395ebf5939cd",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar registro Pehui",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{ msg.payload.AI1.nivel_limnimetrico }}},\n    {{{ msg.payload.AI1.caudal }}});",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 620,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a7b53b36ed38903a",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Check AI1 status",
+        "property": "payload.AI1.sensor_status",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "Ok",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "Error",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 350,
+        "y": 500,
+        "wires": [
+            [
+                "a7765e2ca73f955e",
+                "56a4395ebf5939cd"
+            ],
+            [
+                "931c321a8d139939"
+            ]
+        ]
+    },
+    {
+        "id": "7ed6f2b351432dc7",
+        "type": "rbe",
+        "z": "f6f2187d.f17ca8",
+        "name": "Status filter",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload.AI0.sensor_status",
+        "topi": "topic",
+        "x": 590,
+        "y": 360,
+        "wires": [
+            [
+                "32667a9d7b3dc322"
+            ]
+        ]
+    },
+    {
+        "id": "a7765e2ca73f955e",
+        "type": "rbe",
+        "z": "f6f2187d.f17ca8",
+        "name": "Status filter",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload.AI1.sensor_status",
+        "topi": "topic",
+        "x": 590,
+        "y": 540,
+        "wires": [
+            [
+                "e177fe3b512d5553"
+            ]
+        ]
+    },
+    {
+        "id": "31e89ae3f4fed3a6",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar registro Rhom",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{ msg.payload.AI0.nivel_limnimetrico }}},\n    {{{ msg.payload.AI0.caudal }}});",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 620,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e177fe3b512d5553",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar log",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    2,\n    'Info',\n    'Sensor AI1 ok.');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 770,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "479d785e58b2924b",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar log",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    1,\n    'Error',\n    'Sensor AI0 error.');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 770,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0b8999ac3911ae51",
+        "type": "rbe",
+        "z": "f6f2187d.f17ca8",
+        "name": "Status filter",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload.AI0.sensor_status",
+        "topi": "topic",
+        "x": 590,
+        "y": 420,
+        "wires": [
+            [
+                "479d785e58b2924b"
+            ]
+        ]
+    },
+    {
+        "id": "931c321a8d139939",
+        "type": "rbe",
+        "z": "f6f2187d.f17ca8",
+        "name": "Status filter",
+        "func": "rbe",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload.AI1.sensor_status",
+        "topi": "topic",
+        "x": 590,
+        "y": 600,
+        "wires": [
+            [
+                "dc0248c2ccd031c0"
+            ]
+        ]
+    },
+    {
+        "id": "dc0248c2ccd031c0",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar log",
+        "query": "INSERT INTO logs_eventos (fecha_hora,\n    id_obra,\n    tipo_log,\n    evento)\n    VALUES (NOW(), \n    2,\n    'Error',\n    'Sensor AI1 error.');",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 770,
+        "y": 600,
+        "wires": [
+            []
         ]
     },
     {
@@ -679,7 +925,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Hora",
-        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
+        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'Enviado ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -774,7 +1020,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "ExtractResponse",
-        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\nlet error_counter = context.get('error_counter') || 0;\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n    new_payload[\"httpStatusCode\"] = httpStatusCode;\n    new_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\n    status = soap_data[\"status\"][0];\n    new_payload[\"codigo_dga\"] = status[\"Code\"][0];\n    new_payload[\"descripcion\"] = status[\"Description\"][0];\n\n    if (new_payload[\"codigo_dga\"] == 0){\n        new_payload[\"estado_dga\"] = 'enviado - ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Codigo DGA distinto de cero\";\n}\ncatch (error) {    \n    context.set('error_counter', error_counter + 1);\n    \n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 5){\n        new_payload[\"estado_dga\"] = 'enviado - error';\n    }\n\n    new_payload[\"comprobante_dga\"] = 0;\n}\n\nmsg.payload = new_payload;\nreturn msg;",
+        "func": "let httpStatusCode = msg.statusCode;\nlet soap_data;\nlet status;\nlet new_payload = {};\nlet error_counter = context.get('error_counter') || 0;\n\nmsg.xml = msg.payload;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    soap_data = msg.payload[\"soapenv:Envelope\"][\"soapenv:Body\"][0][\"authSendDataExtraccionResponse\"][0];\n    new_payload[\"httpStatusCode\"] = httpStatusCode;\n    new_payload[\"comprobante_dga\"] = soap_data[\"numeroComprobante\"][0];\n\n    status = soap_data[\"status\"][0];\n    new_payload[\"codigo_dga\"] = status[\"Code\"][0];\n    new_payload[\"descripcion\"] = status[\"Description\"][0];\n\n    if (new_payload[\"codigo_dga\"] == 0){\n        new_payload[\"estado_dga\"] = 'Enviado ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Codigo DGA distinto de cero\";\n}\ncatch (error) {    \n    context.set('error_counter', error_counter + 1);\n    \n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 5){\n        new_payload[\"estado_dga\"] = 'Error en enviado';\n    }\n\n    new_payload[\"comprobante_dga\"] = 0;\n}\n\nmsg.payload = new_payload;\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -925,12 +1171,12 @@
         "rules": [
             {
                 "t": "eq",
-                "v": "enviado - error",
+                "v": "Error en enviado",
                 "vt": "str"
             },
             {
                 "t": "eq",
-                "v": "enviado - ok",
+                "v": "Enviado ok",
                 "vt": "str"
             }
         ],
