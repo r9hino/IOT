@@ -394,7 +394,7 @@
         "payload": "This is a test",
         "payloadType": "str",
         "x": 100,
-        "y": 100,
+        "y": 80,
         "wires": [
             [
                 "ab24375cb61c90bf"
@@ -415,7 +415,7 @@
         "name": "philippe.ilharreguy@gmail.com",
         "dname": "PI email",
         "x": 260,
-        "y": 100,
+        "y": 80,
         "wires": []
     },
     {
@@ -432,7 +432,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 540,
-        "y": 160,
+        "y": 180,
         "wires": []
     },
     {
@@ -448,7 +448,7 @@
         "finalize": "",
         "libs": [],
         "x": 240,
-        "y": 160,
+        "y": 180,
         "wires": [
             [
                 "dd90b7fa6e9340fa"
@@ -477,7 +477,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 100,
-        "y": 160,
+        "y": 180,
         "wires": [
             [
                 "68926513297359aa"
@@ -493,7 +493,7 @@
         "wsdl": "22d655552657cf36",
         "method": "getDataExtraccionOp",
         "x": 370,
-        "y": 160,
+        "y": 180,
         "wires": [
             [
                 "9ae215cb4e377e36"
@@ -800,10 +800,10 @@
         "id": "6b9dcce09517d5be",
         "type": "comment",
         "z": "c19fc8a18bff1dd0",
-        "name": "Descripcion logica",
+        "name": "Descripcion logica envios y reenvios datos a DGA",
         "info": "Cada x minutos enviar registro mas antiguo no enviado\n\nQuedan registros por mandar?\nSi: intenta enviar\nNo: no se intenta enviar\n",
-        "x": 110,
-        "y": 220,
+        "x": 200,
+        "y": 260,
         "wires": []
     },
     {
@@ -828,7 +828,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 110,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "ad01ed3eca76398e"
@@ -846,7 +846,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 300,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "d166a3e61c85fd73"
@@ -867,7 +867,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 700,
-        "y": 280,
+        "y": 300,
         "wires": []
     },
     {
@@ -883,7 +883,7 @@
         "finalize": "",
         "libs": [],
         "x": 500,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "7fd3ab3ed7b58461"
@@ -907,7 +907,7 @@
         "senderr": false,
         "headers": [],
         "x": 230,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "92d200e06ac25b0f"
@@ -923,7 +923,7 @@
         "attr": "",
         "chr": "",
         "x": 370,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "9b32cbcc762bfc04"
@@ -943,7 +943,7 @@
         "finalize": "",
         "libs": [],
         "x": 530,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "635fa7ee3059fb8c",
@@ -969,7 +969,7 @@
         "repair": false,
         "outputs": 1,
         "x": 90,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "d8df1f317d9e5ea8"
@@ -987,7 +987,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 720,
-        "y": 340,
+        "y": 360,
         "wires": [
             [
                 "234f2217f7419470"
@@ -1005,7 +1005,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 460,
-        "y": 400,
+        "y": 420,
         "wires": [
             [
                 "2cd964c87b09a7be"
@@ -1026,7 +1026,7 @@
         "statusVal": "payload[0]",
         "statusType": "msg",
         "x": 700,
-        "y": 400,
+        "y": 420,
         "wires": []
     }
 ]
