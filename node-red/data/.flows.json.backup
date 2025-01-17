@@ -323,7 +323,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n*/\n\nlet AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.A0.voltage,\n    nivel_limnimetrico: 0,\n    caudal: 0,\n    sensor_status: null\n};\n\nlet AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.A1.voltage,\n    nivel_limnimetrico: 0,\n    caudal: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (AI0.voltaje_potencia < 0.5) {\n    AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    AI0.sensor_status = \"Ok\";\n\n    // Calcular caudal Rhom.\n    AI0.caudal = AI0.voltaje_potencia*250;\n}\n\n// Medicion AI1 con error\nif (AI1.voltaje_potencia < 0.5) {\n    AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    AI1.sensor_status = \"Ok\";\n\n    // Calcular caudal Rhom.\n    AI1.caudal = AI1.voltaje_potencia*250;\n}\n\nlet payload = {};\npayload[\"AI0\"] = AI0;\npayload[\"AI1\"] = AI1;\n\nmsg.payload = payload;\n\nreturn msg;",
+        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n\nRhom 4-20mA -> 0.6-3V -> 0-3500kW\nPehui 4-20mA -> 0.6-3V -> 0-1200kW\n*/\n\nlet AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.A0.voltage,\n    nivel_limnimetrico_m: 0,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.A1.voltage,\n    nivel_limnimetrico_m: 0,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (AI0.voltaje_potencia < 0.5) {\n    AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    AI0.sensor_status = \"Ok\";\n    // Potencia generacion kW Rhom.\n    AI0.potencia_kw = (3500 - 0)/(3 - 0)*(AI0.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Rhom.\n    AI0.caudal_m3s = (594.615 + 0.74642 * AI0.potencia_kw + 0.0000862 * AI0.potencia_kw * AI0.potencia_kw)/1000;\n}\n\n// Medicion AI1 con error\nif (AI1.voltaje_potencia < 0.5) {\n    AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    AI1.sensor_status = \"Ok\";\n    // Potencia generacion kW Pehui.\n    AI1.potencia_kw = (1200 - 0) / (3 - 0) * (AI1.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Pehui.\n    AI1.caudal_m3s = (594.615 + 0.74642 * AI1.potencia_kw + 0.0000862 * AI1.potencia_kw * AI1.potencia_kw) / 1000;\n}\n\nlet payload = {};\npayload[\"AI0\"] = AI0;\npayload[\"AI1\"] = AI1;\n\nmsg.payload = payload;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -395,7 +395,7 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro Pehui",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{ msg.payload.AI1.nivel_limnimetrico }}},\n    {{{ msg.payload.AI1.caudal }}});",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{ msg.payload.AI1.nivel_limnimetrico_m }}},\n    {{{ msg.payload.AI1.caudal_m3s }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -485,7 +485,7 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro Rhom",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{ msg.payload.AI0.nivel_limnimetrico }}},\n    {{{ msg.payload.AI0.caudal }}});",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    1,\n    {{{ msg.payload.AI0.nivel_limnimetrico_m }}},\n    {{{ msg.payload.AI0.caudal_m3s }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -758,7 +758,7 @@
         "id": "6b9dcce09517d5be",
         "type": "comment",
         "z": "c19fc8a18bff1dd0",
-        "name": "Descripcion logica",
+        "name": "Envio datos Rhom",
         "info": "Cada x minutos enviar registro mas antiguo no enviado\n\nQuedan registros por mandar?\nSi: intenta enviar\nNo: no se intenta enviar\n",
         "x": 110,
         "y": 220,
@@ -797,17 +797,17 @@
         "id": "ad01ed3eca76398e",
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
-        "name": "Query Registros Hora",
+        "name": "Query Registros Hora Rhom",
         "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'Enviado ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 300,
+        "x": 320,
         "y": 280,
         "wires": [
             [
-                "d166a3e61c85fd73"
+                "356fa6003b59a4df"
             ]
         ]
     },
@@ -815,7 +815,7 @@
         "id": "356fa6003b59a4df",
         "type": "debug",
         "z": "c19fc8a18bff1dd0",
-        "name": "debug 12",
+        "name": "debug 2",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -1147,17 +1147,17 @@
         "id": "398998db87436301",
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
-        "name": "Query Registros Hora",
+        "name": "Query Registros Hora Pehui",
         "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 2\nAND estado_dga <> 'Enviado ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
-        "x": 300,
+        "x": 320,
         "y": 680,
         "wires": [
             [
-                "f8bc2af073ac5d75"
+                "8e966c356adfb669"
             ]
         ]
     },
@@ -1165,7 +1165,7 @@
         "id": "8e966c356adfb669",
         "type": "debug",
         "z": "c19fc8a18bff1dd0",
-        "name": "debug 2",
+        "name": "debug 3",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -1463,5 +1463,15 @@
                 "2c960ec55b95010b"
             ]
         ]
+    },
+    {
+        "id": "a752e927eb9f7d09",
+        "type": "comment",
+        "z": "c19fc8a18bff1dd0",
+        "name": "Envio datos Pehui",
+        "info": "Cada x minutos enviar registro mas antiguo no enviado\n\nQuedan registros por mandar?\nSi: intenta enviar\nNo: no se intenta enviar\n",
+        "x": 110,
+        "y": 620,
+        "wires": []
     }
 ]
