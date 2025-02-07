@@ -68,10 +68,10 @@ services:
     environment:
       - POSTGRES_USERNAME=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PLC_PRIVATE_IP=${PLC_PRIVATE_IP}
-      - PLC_PORT=${PLC_PORT}
-      - PHONE_NUMBER_1=${PHONE_NUMBER_1}
-      - PHONE_NUMBER_2=${PHONE_NUMBER_2}
+      - DGA_CODIGO=${DGA_CODIGO}
+      - DGA_PASSWORD=${DGA_PASSWORD}
+      - DGA_USUARIO_RUT=${DGA_USUARIO_RUT}
+      - DGA_EMPRESA_RUT=${DGA_EMPRESA_RUT}
     depends_on:
       timescale:
         condition: service_started
