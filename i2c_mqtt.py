@@ -18,31 +18,52 @@ PUBLISH_TOPIC = "sensor/i2c"
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
-# Initialize I2C and ADS1115
+# Initialize I2C and two ADS1115 devices
 try:
     i2c = busio.I2C(board.SCL, board.SDA)
-    ads = ADS.ADS1115(i2c)
-    channel_A0 = AnalogIn(ads, ADS.P0)  # A0
-    channel_A1 = AnalogIn(ads, ADS.P1)  # A1
+
+    # ADS1115 at address 0x48
+    ads1 = ADS.ADS1115(i2c, address=0x48)
+    ads1_A0 = AnalogIn(ads1, ADS.P0)
+    ads1_A1 = AnalogIn(ads1, ADS.P1)
+
+    # ADS1115 at address 0x49
+    ads2 = ADS.ADS1115(i2c, address=0x49)
+    ads2_A0 = AnalogIn(ads2, ADS.P0)
+    ads2_A1 = AnalogIn(ads2, ADS.P1)
+
 except Exception as e:
-    logging.error(f"Failed to initialize I2C or ADS1115: {e}")
+    logging.error(f"Failed to initialize I2C or ADS1115 devices: {e}")
     raise SystemExit
 
-# Read sensor data
+# Read sensor data from both ADS1115 devices
 def read_sensor():
     try:
-        return {
-            "A0": {
-                "analog_value": channel_A0.value,
-                "voltage": channel_A0.voltage
+        sensor_data = {
+            "ads1": {
+                "A0": {
+                    "analog_value": ads1_A0.value,
+                    "voltage": ads1_A0.voltage
+                },
+                "A1": {
+                    "analog_value": ads1_A1.value,
+                    "voltage": ads1_A1.voltage
+                }
             },
-            "A1": {
-                "analog_value": channel_A1.value,
-                "voltage": channel_A1.voltage
+            "ads2": {
+                "A0": {
+                    "analog_value": ads2_A0.value,
+                    "voltage": ads2_A0.voltage
+                },
+                "A1": {
+                    "analog_value": ads2_A1.value,
+                    "voltage": ads2_A1.voltage
+                }
             }
         }
+        return sensor_data
     except Exception as e:
-        logging.error(f"Error reading from sensor: {e}")
+        logging.error(f"Error reading from ADS1115 devices: {e}")
         return None
 
 # Connect to the MQTT broker
@@ -55,8 +76,6 @@ def connect_mqtt():
 # Callback for when a message is received on the subscribed topic
 def on_message(client, userdata, msg):
     logging.info(f"Received message: {msg.payload.decode()}")
-    
-    # Read sensor data
     sensor_data = read_sensor()
     if sensor_data:
         client.publish(PUBLISH_TOPIC, json.dumps(sensor_data))
@@ -68,7 +87,6 @@ def on_message(client, userdata, msg):
 def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0:
         logging.info(f"Connected to MQTT broker at {BROKER}:{PORT}")
-        # Subscribing in on_connect() means that if we lose the connection and reconnect then subscriptions will be renewed.
         client.subscribe(SUBSCRIBE_TOPIC)
     else:
         logging.error(f"Connection failed with code {rc}")
@@ -82,7 +100,7 @@ def main():
     connect_mqtt()
     client.on_connect = on_connect
     client.on_message = on_message
-    client.on_disconnect = on_disconnect  # Set the disconnect callback
+    client.on_disconnect = on_disconnect
     client.loop_start()
 
     try:
