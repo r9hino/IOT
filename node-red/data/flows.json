@@ -175,7 +175,7 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 360,
+        "x": 340,
         "y": 320,
         "wires": []
     },
@@ -312,14 +312,14 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x48.\nAI0 deberia ser señal nivel rebalse Rhom, AI1 señal de Pehui.\n\nRhom 4-20mA -> 0.6-3V -> 0-1m\nPehui 4-20mA -> 0.6-3V -> 0-1m\n*/\n\nlet ads1_AI0 = {\n    info: \"Señal 4-20mA nivel rebalse Rhom\",\n    voltaje_rebalse: msg.payload.ads1.A0.voltage,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads1_AI1 = {\n    info: \"Señal 4-20mA nivel rebalse Pehui\",\n    voltaje_rebalse: msg.payload.ads1.A1.voltage,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n/* \nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n\nRhom 4-20mA -> 0.6-3V -> 0-3500kW\nPehui 4-20mA -> 0.6-3V -> 0-1200kW\n*/\n\nlet ads2_AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.ads2.A0.voltage,\n    nivel_limnimetrico_m: 0,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads2_AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.ads2.A1.voltage,\n    nivel_limnimetrico_m: 0,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (ads2_AI0.voltaje_potencia < 0.6) {\n    ads2_AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    ads2_AI0.sensor_status = \"Ok\";\n    // Potencia generacion kW Rhom.\n    ads2_AI0.potencia_kw = (3500 - 0)/(3 - 0)*(ads2_AI0.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Rhom.\n    ads2_AI0.caudal_m3s = (594.615 + 0.74642 * ads2_AI0.potencia_kw + 0.0000862 * ads2_AI0.potencia_kw * ads2_AI0.potencia_kw)/1000;\n}\n\n// Medicion AI1 con error\nif (ads2_AI1.voltaje_potencia < 0.6) {\n    ads2_AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    ads2_AI1.sensor_status = \"Ok\";\n    // Potencia generacion kW Pehui.\n    ads2_AI1.potencia_kw = (1200 - 0) / (3 - 0) * (ads2_AI1.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Pehui.\n    ads2_AI1.caudal_m3s = (1.30994 + 1.29226 * ads2_AI1.potencia_kw + 0.0000017902862 * ads2_AI1.potencia_kw * ads2_AI1.potencia_kw) / 1000;\n}\n\nlet payload = {};\npayload[\"ads1_AI0\"] = ads1_AI0;\npayload[\"ads1_AI1\"] = ads1_AI1;\npayload[\"ads2_AI0\"] = ads2_AI0;\npayload[\"ads2_AI1\"] = ads2_AI1;\n\nmsg.payload = payload;\n\nreturn msg;",
+        "func": "/*\nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x48 (ADDR to GND).\nADS1 recopila niveles de rebalse.\nAI0 deberia ser señal nivel rebalse Rhom, AI1 señal de Pehui.\nRhom 4-20mA -> 0.6-3V -> 0-1m\nPehui 4-20mA -> 0.6-3V -> 0-1m\n*/\n\nlet ads1_AI0 = {\n    info: \"Señal 4-20mA nivel rebalse Rhom\",\n    voltaje_rebalse: msg.payload.ads1.A0.voltage,\n    voltaje_nivel_ref: 1.19,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads1_AI1 = {\n    info: \"Señal 4-20mA nivel rebalse Pehui\",\n    voltaje_rebalse: msg.payload.ads1.A1.voltage,\n    voltaje_nivel_ref: 1.19,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Rhom: Calculo descarga rebalse m3/s segun medicion nivel\n// Medicion AI0 con error\nif (ads1_AI0.voltaje_rebalse < 0.57) {\n    ads1_AI0.sensor_status = \"Error\";\n    ads1_AI0.nivel_limnimetrico_m = 0;\n}\n// Medicion AI0 ok\nelse{\n    ads1_AI0.sensor_status = \"Ok\";\n    // Nivel rebalse lateral Rhom.\n    ads1_AI0.nivel_limnimetrico_m = (1 - 0) / (3 - 0.6) * (ads1_AI0.voltaje_rebalse - ads1_AI0.voltaje_nivel_ref);\n    if(ads1_AI0.nivel_limnimetrico_m < 0) ads1_AI0.nivel_limnimetrico_m = 0;\n\n    // Calcular caudal m3/s Rhom.\n    ads1_AI0.caudal_m3s = (0 + 6.81025 * ads1_AI0.nivel_limnimetrico_m + 38.140702 * ads1_AI0.nivel_limnimetrico_m * ads1_AI0.nivel_limnimetrico_m)/1000;\n}\n\n// Pehui: Calculo descarga rebalse m3/s segun medicion nivel\n// AI1 con error\nif (ads1_AI1.voltaje_rebalse < 0.57) {\n    ads1_AI1.sensor_status = \"Error\";\n    ads1_AI1.nivel_limnimetrico_m = 0;\n}\n// Medicion AI1 ok\nelse{\n    ads1_AI1.sensor_status = \"Ok\";\n    // Nivel rebalse lateral Pehui.\n    ads1_AI1.nivel_limnimetrico_m = (1 - 0) / (3 - 0.6) * (ads1_AI1.voltaje_rebalse - ads1_AI1.voltaje_nivel_ref);\n    if(ads1_AI1.nivel_limnimetrico_m < 0) ads1_AI1.nivel_limnimetrico_m = 0;\n\n    // Calcular caudal m3/s Pehui.\n    ads1_AI1.caudal_m3s = (0 + 6.81025 * ads1_AI1.nivel_limnimetrico_m + 38.140702 * ads1_AI1.nivel_limnimetrico_m * ads1_AI1.nivel_limnimetrico_m)/1000;\n}\n\n\n\n\n/* \nPotencia -> Corriente -> voltaje -> Caudal\nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x49 (ADDR to Vdd).\nADS2 obtiene potencias de turbinas.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n\nRhom 4-20mA -> 0.6-3V -> 0-3500kW\nPehui 4-20mA -> 0.6-3V -> 0-1200kW\n*/\n\nlet ads2_AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.ads2.A0.voltage,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads2_AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.ads2.A1.voltage,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (ads2_AI0.voltaje_potencia < 0.6) {\n    ads2_AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    ads2_AI0.sensor_status = \"Ok\";\n    // Potencia generacion kW Rhom.\n    ads2_AI0.potencia_kw = (3500 - 0)/(3 - 0.6)*(ads2_AI0.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Rhom.\n    ads2_AI0.caudal_m3s = (594.615 + 0.74642 * ads2_AI0.potencia_kw + 0.0000862 * ads2_AI0.potencia_kw * ads2_AI0.potencia_kw)/1000;\n}\n\n// Medicion AI1 con error\nif (ads2_AI1.voltaje_potencia < 0.6) {\n    ads2_AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    ads2_AI1.sensor_status = \"Ok\";\n    // Potencia generacion kW Pehui.\n    ads2_AI1.potencia_kw = (1200 - 0) / (3 - 0.6) * (ads2_AI1.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Pehui.\n    ads2_AI1.caudal_m3s = (1.30994 + 1.29226 * ads2_AI1.potencia_kw + 0.0000017902862 * ads2_AI1.potencia_kw * ads2_AI1.potencia_kw) / 1000;\n}\n\nlet payload = {};\npayload[\"ads1_AI0\"] = ads1_AI0;\npayload[\"ads1_AI1\"] = ads1_AI1;\npayload[\"ads2_AI0\"] = ads2_AI0;\npayload[\"ads2_AI1\"] = ads2_AI1;\npayload[\"rhom_caudales\"] = {\n    caudal_rebalse_m3s: ads1_AI0.caudal_m3s,\n    caudal_turbina_m3s: ads2_AI0.caudal_m3s,\n    caudal_total_m3s: ads1_AI0.caudal_m3s + ads2_AI0.caudal_m3s};\npayload[\"pehui_caudales\"] = {\n    caudal_rebalse_m3s: ads1_AI1.caudal_m3s,\n    caudal_turbina_m3s: ads2_AI1.caudal_m3s,\n    caudal_total_m3s: ads1_AI1.caudal_m3s + ads2_AI1.caudal_m3s};\n\nmsg.payload = payload;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 140,
+        "x": 120,
         "y": 380,
         "wires": [
             [
@@ -333,7 +333,7 @@
         "id": "4946d3f5dd275c08",
         "type": "switch",
         "z": "f6f2187d.f17ca8",
-        "name": "Check AI0 status",
+        "name": "Check ADS2 AI0 status",
         "property": "payload.ads2_AI0.sensor_status",
         "propertyType": "msg",
         "rules": [
@@ -374,7 +374,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 770,
-        "y": 360,
+        "y": 340,
         "wires": [
             []
         ]
@@ -384,13 +384,13 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro Pehui",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{ msg.payload.ads2_AI1.nivel_limnimetrico_m }}},\n    {{{ msg.payload.ads2_AI1.caudal_m3s }}});",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    0,\n    {{{ msg.payload.pehui_caudales.caudal_total_m3s }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 620,
-        "y": 480,
+        "y": 460,
         "wires": [
             []
         ]
@@ -399,7 +399,7 @@
         "id": "a7b53b36ed38903a",
         "type": "switch",
         "z": "f6f2187d.f17ca8",
-        "name": "Check AI1 status",
+        "name": "Check ADS2 AI1 status",
         "property": "payload.ads2_AI1.sensor_status",
         "propertyType": "msg",
         "rules": [
@@ -433,7 +433,7 @@
         "id": "7ed6f2b351432dc7",
         "type": "rbe",
         "z": "f6f2187d.f17ca8",
-        "name": "Status filter",
+        "name": "Ok status filter",
         "func": "rbe",
         "gap": "",
         "start": "",
@@ -441,8 +441,8 @@
         "septopics": true,
         "property": "payload.ads2_AI0.sensor_status",
         "topi": "topic",
-        "x": 590,
-        "y": 360,
+        "x": 600,
+        "y": 340,
         "wires": [
             [
                 "32667a9d7b3dc322"
@@ -453,7 +453,7 @@
         "id": "a7765e2ca73f955e",
         "type": "rbe",
         "z": "f6f2187d.f17ca8",
-        "name": "Status filter",
+        "name": "Ok status filter",
         "func": "rbe",
         "gap": "",
         "start": "",
@@ -461,8 +461,8 @@
         "septopics": true,
         "property": "payload.ads2_AI1.sensor_status",
         "topi": "topic",
-        "x": 590,
-        "y": 540,
+        "x": 600,
+        "y": 520,
         "wires": [
             [
                 "e177fe3b512d5553"
@@ -474,13 +474,13 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro Rhom",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    1,\n    {{{ msg.payload.ads2_AI0.nivel_limnimetrico_m }}},\n    {{{ msg.payload.ads2_AI0.caudal_m3s }}});",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    1,\n    0,\n    {{{ msg.payload.rhom_caudales.caudal_total_m3s }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 620,
-        "y": 300,
+        "y": 280,
         "wires": [
             []
         ]
@@ -496,7 +496,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 770,
-        "y": 540,
+        "y": 520,
         "wires": [
             []
         ]
@@ -512,7 +512,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 770,
-        "y": 420,
+        "y": 400,
         "wires": [
             []
         ]
@@ -521,7 +521,7 @@
         "id": "0b8999ac3911ae51",
         "type": "rbe",
         "z": "f6f2187d.f17ca8",
-        "name": "Status filter",
+        "name": "Error status filter",
         "func": "rbe",
         "gap": "",
         "start": "",
@@ -529,8 +529,8 @@
         "septopics": true,
         "property": "payload.ads2_AI0.sensor_status",
         "topi": "topic",
-        "x": 590,
-        "y": 420,
+        "x": 600,
+        "y": 400,
         "wires": [
             [
                 "479d785e58b2924b"
@@ -541,7 +541,7 @@
         "id": "931c321a8d139939",
         "type": "rbe",
         "z": "f6f2187d.f17ca8",
-        "name": "Status filter",
+        "name": "Error status filter",
         "func": "rbe",
         "gap": "",
         "start": "",
@@ -549,8 +549,8 @@
         "septopics": true,
         "property": "payload.ads2_AI1.sensor_status",
         "topi": "topic",
-        "x": 590,
-        "y": 600,
+        "x": 600,
+        "y": 580,
         "wires": [
             [
                 "dc0248c2ccd031c0"
@@ -568,7 +568,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 770,
-        "y": 600,
+        "y": 580,
         "wires": [
             []
         ]
@@ -672,7 +672,6 @@
         "id": "1586e2347ef23312",
         "type": "inject",
         "z": "c19fc8a18bff1dd0",
-        "d": true,
         "name": "",
         "props": [
             {
@@ -683,7 +682,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "128",
+        "repeat": "127",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
