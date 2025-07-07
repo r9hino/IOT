@@ -76,6 +76,37 @@
         "sessionExpiry": ""
     },
     {
+        "id": "b079be9b8d45d5a2",
+        "type": "mqtt-broker",
+        "name": "Camara-Carga-MQTT-Server",
+        "broker": "100.79.223.18",
+        "port": "51883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
         "id": "fbd6fb10ebb4e77f",
         "type": "function",
         "z": "f6f2187d.f17ca8",
@@ -87,8 +118,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 400,
-        "y": 440,
+        "x": 300,
+        "y": 620,
         "wires": [
             [
                 "801304a26341c444"
@@ -108,8 +139,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
-        "y": 440,
+        "x": 440,
+        "y": 620,
         "wires": []
     },
     {
@@ -133,8 +164,8 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 250,
-        "y": 440,
+        "x": 150,
+        "y": 620,
         "wires": [
             [
                 "fbd6fb10ebb4e77f"
@@ -292,7 +323,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "let v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\n\n// Convertir voltaje a profundidad\n// Sensor aforado - Ver excel Monitoreo Caudal DGA Bocatoma Don Walterio\nlet h_nivel_aforador = (0.75 - 0.3) / (1.19 - 0.872) * (v_nivel_aforador - 0.872) + 0.3;\nif (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n// Caudal canal segun curva carga Ernesto Gesche\nlet Q = -0.04977 + 1.75132 * h_nivel_aforador + 3.99181 * h_nivel_aforador * h_nivel_aforador;\nif (Q < 0) Q = 0;\n\n// Calcular profundidad nivel rio.\n// Sensor 4mA -> 0.6V -> 0m         20mA -> 3.0V -> 3m\nlet h_nivel_rio = (3 - 0.0) / (3 - 0.6) * (v_nivel_rio - 0.6) + 0;\nif (h_nivel_rio < 0) h_nivel_rio = 0;\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
+        "func": "let v_nivel_aforador = msg.payload.A0.voltage;\nlet v_nivel_rio = msg.payload.A1.voltage;\n\n// Convertir voltaje a profundidad\n// Sensor aforado - Ver excel Monitoreo Caudal DGA Bocatoma Don Walterio\n//let h_nivel_aforador = (0.75 - 0.3) / (1.19 - 0.872) * (v_nivel_aforador - 0.872) + 0.3;\nlet h_nivel_aforador = 0.69 / (1.112 - 0.6) * (v_nivel_aforador - 1.112) + 0.69;\nif (h_nivel_aforador < 0) h_nivel_aforador = 0;\n\n// Caudal canal segun curva carga Ernesto Gesche\nlet Q = -0.04977 + 1.75132 * h_nivel_aforador + 3.99181 * h_nivel_aforador * h_nivel_aforador;\nif (Q < 0) Q = 0;\n\n// Calcular profundidad nivel rio.\n// Sensor 4mA -> 0.6V -> 0m         20mA -> 3.0V -> 3m\nlet h_nivel_rio = (3 - 0.0) / (3 - 0.6) * (v_nivel_rio - 0.6) + 0;\nif (h_nivel_rio < 0) h_nivel_rio = 0;\n\nmsg.payload = {\n  v_nivel_aforador: v_nivel_aforador,\n  h_nivel_aforador: h_nivel_aforador,\n  caudal: Q,\n  v_nivel_rio: v_nivel_rio,\n  h_nivel_rio: h_nivel_rio\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -319,7 +350,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 560,
-        "y": 360,
+        "y": 340,
         "wires": [
             []
         ]
@@ -328,9 +359,9 @@
         "id": "7e5414a1f36aa5d0",
         "type": "comment",
         "z": "f6f2187d.f17ca8",
-        "name": "Solcitud a script de Python via MQTT para obtener datos de sensores",
+        "name": "Solcitud a script de Python via MQTT para obtener datos de sensores locales",
         "info": "",
-        "x": 270,
+        "x": 290,
         "y": 160,
         "wires": []
     },
@@ -343,6 +374,100 @@
         "x": 230,
         "y": 260,
         "wires": []
+    },
+    {
+        "id": "17b184a1c84915a5",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Listen-Camara-Carga-Rhom-Data",
+        "topic": "sensor/camara-carga-rhom",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b079be9b8d45d5a2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 500,
+        "wires": [
+            [
+                "a786630ad360cd2d"
+            ]
+        ]
+    },
+    {
+        "id": "1cc0b46ba907d357",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "72f5fdf9add59efd",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Datos remotos desde camara de carga. Se usa ip de Tailscale en vez de hostname camara-carga-pehui-rhom-rpi5.",
+        "info": "",
+        "x": 410,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "a786630ad360cd2d",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Calculo Nivel",
+        "func": "let caudal_m3s = msg.payload.ads2_AI0.caudal_m3s || null;\nlet sensor_status = msg.payload.ads2_AI0.sensor_status;\nlet h_nivel_aforador_cm;\n\n// Convertir caudal en nivel\n// Ecuacion de caudal canal segun curva carga Ernesto Gesche\n// Q = -0.04977 + 1.75132 * h_nivel_aforador + 3.99181 * h_nivel_aforador * h_nivel_aforador;\n// Formula cuadratica para obtener nivel aforador a partir del caudal.\nif(sensor_status === 'Ok'){\n  h_nivel_aforador_cm = 100*(-1.75132 + Math.sqrt(1.75132*1.75132 - 4*3.99181*-caudal_m3s))/(2*3.99181);\n}\n\n\nmsg.payload = {\n  h_nivel_aforador_cm: h_nivel_aforador_cm,\n  caudal_m3s: caudal_m3s,\n  caudal_m3s_noise: caudal_m3s + (Math.random() - 0.5)*0.05\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 500,
+        "wires": [
+            [
+                "1cc0b46ba907d357",
+                "2412a9974ed0deef"
+            ]
+        ]
+    },
+    {
+        "id": "937cd3fe5f0e8cf7",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Puerto es 51883 ya que pasa por docker.",
+        "info": "",
+        "x": 180,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "2412a9974ed0deef",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar registro",
+        "query": "INSERT INTO registros_remotos (fecha_hora,\n    id_obra,\n    nivel_aforador,\n    caudal)\n    VALUES (NOW() - interval '3 hours', \n    1,\n    {{{ msg.payload.h_nivel_aforador_cm }}},\n    {{{ msg.payload.caudal_m3s_noise }}});",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 560,
+        "y": 540,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "b234123a.c95f5",
@@ -453,14 +578,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "127",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
+        "x": 110,
         "y": 200,
         "wires": [
             [
@@ -473,7 +598,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Hora",
-        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
+        "query": "SELECT * FROM registros_remotos_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -491,7 +616,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Update Registro",
-        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.data.numeroComprobante }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = 1;",
+        "query": "UPDATE registros_remotos_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.data.numeroComprobante }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = 1;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -509,7 +634,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Pendientes",
-        "query": "select count(*) AS registros_pendientes\nfrom registros_hora\nwhere \"estado_dga\" <> 'enviado - ok';",
+        "query": "select count(*) AS registros_pendientes\nfrom registros_remotos_hora\nwhere \"estado_dga\" <> 'enviado - ok';",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -565,7 +690,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "Create JSON",
-        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif (msg.payload[0] === undefined) {\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nconst dga_codigo = env.get('DGA_CODIGO');\nconst dga_password = env.get('DGA_PASSWORD');\nconst dga_usuario_rut = env.get('DGA_USUARIO_RUT');\nconst dga_empresa_rut = env.get('DGA_EMPRESA_RUT');\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\nconst timestamp_local_no_ms = timestamp_local.toISOString().split('.')[0] + 'Z';\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n   day: '2-digit',\n   month: '2-digit',\n   year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_cm = (msg.payload[0].avg_nivel_aforador*100).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time,\n   caudal: caudal_L_s,\n   totalizador: volumen_m3};\nreturn msg;\n*/\n\n// Set custom headers\nmsg.headers = {\n   codigoObra: dga_codigo,\n   timeStampOrigen: timestamp_local_no_ms\n};\n\n// Prepare JSON body\nmsg.payload = {\n   autenticacion: {\n      password: dga_password,\n      rutEmpresa: dga_empresa_rut,\n      rutUsuario: dga_usuario_rut\n   },\n   medicionSuperficial: {\n      alturaLimnimetrica: profundidad_cm, \n      caudal: caudal_L_s,\n      fechaMedicion: date_local,\n      horaMedicion: time\n   }\n};\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif (msg.payload[0] === undefined) {\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nconst dga_codigo = env.get('DGA_CODIGO');\nconst dga_password = env.get('DGA_PASSWORD');\nconst dga_usuario_rut = env.get('DGA_USUARIO_RUT');\nconst dga_empresa_rut = env.get('DGA_EMPRESA_RUT');\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\nconst timestamp_local_no_ms = timestamp_local.toISOString().split('.')[0] + 'Z';\n\nconst date_local = timestamp_local.toLocaleDateString('sv-SE', {\n   day: '2-digit',\n   month: '2-digit',\n   year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst nivel_aforador_cm = (msg.payload[0].avg_nivel_aforador).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time,\n   caudal_L_s: caudal_L_s,\n   nivel_aforador_cm: nivel_aforador_cm};\nreturn msg;\n*/\n\n// Set custom headers\nmsg.headers = {\n   codigoObra: dga_codigo,\n   timeStampOrigen: timestamp_local_no_ms\n};\n\n// Prepare JSON body\nmsg.payload = {\n   autenticacion: {\n      password: dga_password,\n      rutEmpresa: dga_empresa_rut,\n      rutUsuario: dga_usuario_rut\n   },\n   medicionSuperficial: {\n      alturaLimnimetrica: nivel_aforador_cm, \n      caudal: caudal_L_s,\n      fechaMedicion: date_local,\n      horaMedicion: time\n   }\n};\n\ndelete msg.pgsql;\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -576,8 +701,7 @@
         "y": 260,
         "wires": [
             [
-                "3fa85e21d2c862e9",
-                "32a5773f1b7272a7"
+                "3fa85e21d2c862e9"
             ]
         ]
     },
@@ -622,7 +746,7 @@
         "authType": "",
         "senderr": false,
         "headers": [],
-        "x": 430,
+        "x": 390,
         "y": 260,
         "wires": [
             [
@@ -638,7 +762,7 @@
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 570,
+        "x": 530,
         "y": 260,
         "wires": [
             [
