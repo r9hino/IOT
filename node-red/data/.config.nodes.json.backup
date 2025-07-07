@@ -1,7 +1,7 @@
 {
     "node-red": {
         "name": "node-red",
-        "version": "4.0.5",
+        "version": "4.0.8",
         "local": false,
         "user": false,
         "nodes": {
@@ -540,7 +540,7 @@
                 "types": [
                     "soap request plus"
                 ],
-                "enabled": true,
+                "enabled": false,
                 "local": false,
                 "user": false,
                 "module": "node-red-contrib-soap-plus",
