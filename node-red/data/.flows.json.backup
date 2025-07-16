@@ -427,7 +427,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Nivel",
-        "func": "let caudal_m3s = msg.payload.ads2_AI0.caudal_m3s || null;\nlet sensor_status = msg.payload.ads2_AI0.sensor_status;\nlet h_nivel_aforador_cm;\n\n// Convertir caudal en nivel\n// Ecuacion de caudal canal segun curva carga Ernesto Gesche\n// Q = -0.04977 + 1.75132 * h_nivel_aforador + 3.99181 * h_nivel_aforador * h_nivel_aforador;\n// Formula cuadratica para obtener nivel aforador a partir del caudal.\nif(sensor_status === 'Ok'){\n  h_nivel_aforador_cm = 100*(-1.75132 + Math.sqrt(1.75132*1.75132 - 4*3.99181*-caudal_m3s))/(2*3.99181);\n}\n\n\nmsg.payload = {\n  h_nivel_aforador_cm: h_nivel_aforador_cm,\n  caudal_m3s: caudal_m3s,\n  caudal_m3s_noise: caudal_m3s + (Math.random() - 0.5)*0.05\n};\n\nreturn msg;",
+        "func": "let caudal_m3s = msg.payload.rhom.caudal_total_m3s || null;\nlet sensor_status = msg.payload.ads2_AI0.sensor_status;\nlet h_nivel_aforador_cm;\n\n// Convertir caudal en nivel\n// Ecuacion de caudal canal segun curva carga Ernesto Gesche\n// Q = -0.04977 + 1.75132 * h_nivel_aforador + 3.99181 * h_nivel_aforador * h_nivel_aforador;\n// Formula cuadratica para obtener nivel aforador a partir del caudal.\n// Se elimina coeficiente c de ecuacion: Q = a*h^2 + b*h + c\nif(sensor_status === 'Ok'){\n  h_nivel_aforador_cm = 100*(-1.75132 + Math.sqrt(1.75132*1.75132 - 4*3.99181*-caudal_m3s))/(2*3.99181);\n}\n\nmsg.payload = {\n  h_nivel_aforador_cm: h_nivel_aforador_cm,\n  caudal_m3s: caudal_m3s,\n  caudal_m3s_noise: caudal_m3s + (Math.random() - 0.5)*0.05\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -578,14 +578,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "127",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
+        "x": 110,
         "y": 200,
         "wires": [
             [
