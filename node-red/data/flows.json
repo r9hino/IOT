@@ -76,6 +76,37 @@
         "sessionExpiry": ""
     },
     {
+        "id": "3a4e622fa3c1c706",
+        "type": "mqtt-broker",
+        "name": "Camara-Carga-MQTT-Server",
+        "broker": "100.79.223.18",
+        "port": "51883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
         "id": "fbd6fb10ebb4e77f",
         "type": "function",
         "z": "f6f2187d.f17ca8",
@@ -613,6 +644,100 @@
         "wires": []
     },
     {
+        "id": "16a7443aed3ee70c",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Datos remotos desde camara de carga. Se usa ip de Tailscale en vez de hostname camara-carga-pehui-rhom-rpi5.",
+        "info": "",
+        "x": 410,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "3aa146998658e26d",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Puerto es 51883 ya que pasa por docker.",
+        "info": "",
+        "x": 180,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "236cbd384c04d248",
+        "type": "mqtt in",
+        "z": "f6f2187d.f17ca8",
+        "name": "Listen-Camara-Carga-Pehui-Data",
+        "topic": "sensor/camara-carga-pehui",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "3a4e622fa3c1c706",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 880,
+        "wires": [
+            [
+                "540226749f1012f8"
+            ]
+        ]
+    },
+    {
+        "id": "540226749f1012f8",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Calculo Nivel",
+        "func": "let caudal_m3s = msg.payload.pehui.caudal_total_m3s || null;\nlet caudal_m3s_noise;\nlet sensor_status = msg.payload.ads2_AI1.sensor_status;\nlet h_nivel_aforador_cm;\n\n// Convertir caudal en nivel\n// Ecuacion de caudal canal segun curva carga Ernesto Gesche\n// Q = -0.06618 + 1.02186 * h_nivel_aforador + 1.4491 * h_nivel_aforador * h_nivel_aforador;\n// Formula cuadratica para obtener nivel aforador a partir del caudal.\n// Se elimina coeficiente c de ecuacion: Q = a*h^2 + b*h + c\nif(sensor_status === 'Ok'){\n  caudal_m3s_noise = caudal_m3s + (Math.random() - 0.5)*0.04;\n  h_nivel_aforador_cm = 100*(0.09261 + 0.54499*caudal_m3s_noise - 0.06919*caudal_m3s_noise*caudal_m3s_noise);\n}\n\nmsg.payload = {\n  h_nivel_aforador_cm: h_nivel_aforador_cm,\n  caudal_m3s: caudal_m3s,\n  caudal_m3s_noise: caudal_m3s_noise\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 880,
+        "wires": [
+            [
+                "4efaeb2bec737b89",
+                "424fc9041067724c"
+            ]
+        ]
+    },
+    {
+        "id": "424fc9041067724c",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "4efaeb2bec737b89",
+        "type": "postgresql",
+        "z": "f6f2187d.f17ca8",
+        "name": "Insertar registro",
+        "query": "INSERT INTO registros_remotos (fecha_hora,\n    id_obra,\n    nivel_aforador,\n    caudal)\n    VALUES (NOW() - interval '3 hours', \n    1,\n    {{{ msg.payload.h_nivel_aforador_cm }}},\n    {{{ msg.payload.caudal_m3s_noise }}});",
+        "postgreSQLConfig": "b23d8359c5c9ebfb",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 580,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "b234123a.c95f5",
         "type": "debug",
         "z": "c19fc8a18bff1dd0",
@@ -721,14 +846,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "127",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
+        "x": 110,
         "y": 220,
         "wires": [
             [
@@ -741,7 +866,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query Registros Hora",
-        "query": "SELECT * FROM registros_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
+        "query": "SELECT * FROM registros_remotos_hora\nWHERE bucket < date_trunc('hour', now())\nAND id_obra = 1\nAND estado_dga <> 'enviado - ok'\nORDER BY bucket ASC;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -759,7 +884,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Update Registro",
-        "query": "UPDATE registros_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.data.numeroComprobante }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = 1;",
+        "query": "UPDATE registros_remotos_hora\n    SET estado_dga = '{{{ msg.payload.estado_dga }}}',\n        comprobante_dga = '{{{ msg.payload.data.numeroComprobante }}}',\n        fecha_actualizacion = NOW()\n    WHERE bucket = '{{{ msg.id_composite.timestamp_no_ms }}}'\n    AND id_obra = 1;",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -777,7 +902,7 @@
         "type": "postgresql",
         "z": "c19fc8a18bff1dd0",
         "name": "Query registros pendientes",
-        "query": "select count(*) AS registros_pendientes\nfrom registros_hora\nwhere \"estado_dga\" <> 'enviado - ok';",
+        "query": "select count(*) AS registros_pendientes\nfrom registros_remotos_hora\nwhere \"estado_dga\" <> 'enviado - ok';",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -919,7 +1044,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "Create JSON",
-        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif (msg.payload[0] === undefined) {\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nconst dga_codigo = env.get('DGA_CODIGO');\nconst dga_password = env.get('DGA_PASSWORD');\nconst dga_usuario_rut = env.get('DGA_USUARIO_RUT');\nconst dga_empresa_rut = env.get('DGA_EMPRESA_RUT');\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\nconst timestamp_local_no_ms = timestamp_local.toISOString().split('.')[0] + 'Z';\n\nconst date_local = timestamp_local.toLocaleDateString('en-GB', {\n   day: '2-digit',\n   month: '2-digit',\n   year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst profundidad_cm = (msg.payload[0].avg_nivel_aforador*100).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time,\n   caudal: caudal_L_s,\n   totalizador: volumen_m3};\nreturn msg;\n*/\n\n// Set custom headers\nmsg.headers = {\n   codigoObra: dga_codigo,\n   timeStampOrigen: timestamp_local_no_ms\n};\n\n// Prepare JSON body\nmsg.payload = {\n   autenticacion: {\n      password: dga_password,\n      rutEmpresa: dga_empresa_rut,\n      rutUsuario: dga_usuario_rut\n   },\n   medicionSuperficial: {\n      alturaLimnimetrica: profundidad_cm, \n      caudal: caudal_L_s,\n      fechaMedicion: date_local,\n      horaMedicion: time\n   }\n};\n\ndelete msg.pgsql;\n\nreturn msg;\n",
+        "func": "// Se revisa que hayan datos no enviados o con error de envio en Timescale.\nif (msg.payload[0] === undefined) {\n   msg.payload = 'No data to send';\n   return msg;\n}\n\n// Obtener codigo de DGA\nconst dga_codigo = env.get('DGA_CODIGO');\nconst dga_password = env.get('DGA_PASSWORD');\nconst dga_usuario_rut = env.get('DGA_USUARIO_RUT');\nconst dga_empresa_rut = env.get('DGA_EMPRESA_RUT');\n\n// Se generan formatos de fechas. Servidor esta con timezone.\nconst timestamp = new Date(msg.payload[0].bucket);\nconst timestamp_no_ms = timestamp.toISOString().split('.')[0] + 'Z';\nconst options = { timeZone: 'America/Santiago' };\nconst timestamp_local = new Date(timestamp.toLocaleString('en-US', options));\nconst timestamp_local_no_ms = timestamp_local.toISOString().split('.')[0] + 'Z';\n\nconst date_local = timestamp_local.toLocaleDateString('sv-SE', {\n   day: '2-digit',\n   month: '2-digit',\n   year: 'numeric'\n}).split('/').join('-');\n\nconst time = timestamp_local.toISOString().split('T')[1].split('.')[0];\n\nconst caudal_L_s = (msg.payload[0].avg_caudal*1000).toFixed(2);\nconst nivel_aforador_cm = (msg.payload[0].avg_nivel_aforador).toFixed(0);\n\n// Guardar id de query para actualizar despues.\nmsg.id_composite = {\n   timestamp_no_ms: timestamp_no_ms\n};\n\n/*\nmsg.payload = {bucket: msg.payload[0].bucket,\n   timestamp: timestamp, timestamp_no_ms: timestamp_no_ms,\n   date_local: date_local, time: time,\n   caudal_L_s: caudal_L_s,\n   nivel_aforador_cm: nivel_aforador_cm};\nreturn msg;\n*/\n\n// Set custom headers\nmsg.headers = {\n   codigoObra: dga_codigo,\n   timeStampOrigen: timestamp_local_no_ms\n};\n\n// Prepare JSON body\nmsg.payload = {\n   autenticacion: {\n      password: dga_password,\n      rutEmpresa: dga_empresa_rut,\n      rutUsuario: dga_usuario_rut\n   },\n   medicionSuperficial: {\n      alturaLimnimetrica: nivel_aforador_cm, \n      caudal: caudal_L_s,\n      fechaMedicion: date_local,\n      horaMedicion: time\n   }\n};\n\ndelete msg.pgsql;\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
