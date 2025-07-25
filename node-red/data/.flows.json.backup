@@ -312,7 +312,7 @@
         "type": "function",
         "z": "f6f2187d.f17ca8",
         "name": "Calculo Caudal",
-        "func": "/*\nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x48 (ADDR to GND).\nADS1 recopila niveles de rebalse.\nAI0 deberia ser señal nivel rebalse Rhom, AI1 señal de Pehui.\nRhom 4-20mA -> 0.6-3V -> 0-1m\nPehui 4-20mA -> 0.6-3V -> 0-1m\n*/\n\nlet ads1_AI0 = {\n    info: \"Señal 4-20mA nivel rebalse Rhom\",\n    voltaje_rebalse: msg.payload.ads1.A0.voltage,\n    voltaje_nivel_ref: 1.18,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads1_AI1 = {\n    info: \"Señal 4-20mA nivel rebalse Pehui\",\n    voltaje_rebalse: msg.payload.ads1.A1.voltage,\n    voltaje_nivel_ref: 1.19,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Rhom: Calculo descarga rebalse m3/s segun medicion nivel\n// Medicion AI0 con error\nif (ads1_AI0.voltaje_rebalse < 0.57) {\n    ads1_AI0.sensor_status = \"Error\";\n    ads1_AI0.nivel_limnimetrico_m = 0;\n}\n// Medicion AI0 ok\nelse{\n    ads1_AI0.sensor_status = \"Ok\";\n    // Nivel rebalse lateral Rhom.\n    ads1_AI0.nivel_limnimetrico_m = (1 - 0) / (3 - 0.6) * (ads1_AI0.voltaje_rebalse - ads1_AI0.voltaje_nivel_ref);\n    if(ads1_AI0.nivel_limnimetrico_m < 0) ads1_AI0.nivel_limnimetrico_m = 0;\n\n    // Calcular caudal m3/s Rhom.\n    ads1_AI0.caudal_m3s = (0 + 6.81025 * ads1_AI0.nivel_limnimetrico_m + 38.140702 * ads1_AI0.nivel_limnimetrico_m * ads1_AI0.nivel_limnimetrico_m)/1000;\n}\n\n// Pehui: Calculo descarga rebalse m3/s segun medicion nivel\n// AI1 con error\nif (ads1_AI1.voltaje_rebalse < 0.57) {\n    ads1_AI1.sensor_status = \"Error\";\n    ads1_AI1.nivel_limnimetrico_m = 0;\n}\n// Medicion AI1 ok\nelse{\n    ads1_AI1.sensor_status = \"Ok\";\n    // Nivel rebalse lateral Pehui.\n    ads1_AI1.nivel_limnimetrico_m = (1 - 0) / (3 - 0.6) * (ads1_AI1.voltaje_rebalse - ads1_AI1.voltaje_nivel_ref);\n    if(ads1_AI1.nivel_limnimetrico_m < 0) ads1_AI1.nivel_limnimetrico_m = 0;\n\n    // Calcular caudal m3/s Pehui.\n    ads1_AI1.caudal_m3s = (0 + 6.81025 * ads1_AI1.nivel_limnimetrico_m + 38.140702 * ads1_AI1.nivel_limnimetrico_m * ads1_AI1.nivel_limnimetrico_m)/1000;\n}\n\n\n\n\n/* \nPotencia -> Corriente -> voltaje -> Caudal\nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x49 (ADDR to Vdd).\nADS2 obtiene potencias de turbinas.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n\nRhom 4-20mA -> 0.6-3V -> 0-3500kW\nPehui 4-20mA -> 0.6-3V -> 0-1200kW\n*/\n\nlet ads2_AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.ads2.A0.voltage,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads2_AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.ads2.A1.voltage,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (ads2_AI0.voltaje_potencia < 0.6) {\n    ads2_AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    ads2_AI0.sensor_status = \"Ok\";\n    // Potencia generacion kW Rhom.\n    ads2_AI0.potencia_kw = (3500 - 0)/(3 - 0.6)*(ads2_AI0.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Rhom.\n    ads2_AI0.caudal_m3s = (594.615 + 0.74642 * ads2_AI0.potencia_kw + 0.0000862 * ads2_AI0.potencia_kw * ads2_AI0.potencia_kw)/1000;\n}\n\n// Medicion AI1 con error\nif (ads2_AI1.voltaje_potencia < 0.6) {\n    ads2_AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    ads2_AI1.sensor_status = \"Ok\";\n    // Potencia generacion kW Pehui.\n    ads2_AI1.potencia_kw = (1200 - 0) / (3 - 0.6) * (ads2_AI1.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Pehui.\n    ads2_AI1.caudal_m3s = (1.30994 + 1.29226 * ads2_AI1.potencia_kw + 0.0000017902862 * ads2_AI1.potencia_kw * ads2_AI1.potencia_kw) / 1000;\n}\n\nlet payload = {};\npayload[\"ads1_AI0\"] = ads1_AI0;\npayload[\"ads1_AI1\"] = ads1_AI1;\npayload[\"ads2_AI0\"] = ads2_AI0;\npayload[\"ads2_AI1\"] = ads2_AI1;\npayload[\"rhom_caudales\"] = {\n    caudal_rebalse_m3s: ads1_AI0.caudal_m3s,\n    caudal_turbina_m3s: ads2_AI0.caudal_m3s,\n    caudal_total_m3s: ads1_AI0.caudal_m3s + ads2_AI0.caudal_m3s};\npayload[\"pehui_caudales\"] = {\n    caudal_rebalse_m3s: ads1_AI1.caudal_m3s,\n    caudal_turbina_m3s: ads2_AI1.caudal_m3s,\n    caudal_total_m3s: ads1_AI1.caudal_m3s + ads2_AI1.caudal_m3s};\n\nmsg.payload = payload;\n\nreturn msg;",
+        "func": "/*\nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x48 (ADDR to GND).\nADS1 recopila niveles de rebalse.\nAI0 deberia ser señal nivel rebalse Rhom, AI1 señal de Pehui.\nRhom 4-20mA -> 0.6-3V -> 0-1m\nPehui 4-20mA -> 0.6-3V -> 0-1m\n*/\n\nlet ads1_AI0 = {\n    info: \"Señal 4-20mA nivel rebalse Rhom\",\n    voltaje_rebalse: msg.payload.ads1.A0.voltage,\n    voltaje_nivel_ref: 1.18,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads1_AI1 = {\n    info: \"Señal 4-20mA nivel rebalse Pehui\",\n    voltaje_rebalse: msg.payload.ads1.A1.voltage,\n    voltaje_nivel_ref: 1.19,\n    nivel_limnimetrico_m: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Rhom: Calculo descarga rebalse m3/s segun medicion nivel\n// Medicion AI0 con error\nif (ads1_AI0.voltaje_rebalse < 0.57) {\n    ads1_AI0.sensor_status = \"Error\";\n    ads1_AI0.nivel_limnimetrico_m = 0;\n}\n// Medicion AI0 ok\nelse{\n    ads1_AI0.sensor_status = \"Ok\";\n    // Nivel rebalse lateral Rhom.\n    ads1_AI0.nivel_limnimetrico_m = (1 - 0) / (3 - 0.6) * (ads1_AI0.voltaje_rebalse - ads1_AI0.voltaje_nivel_ref);\n    if(ads1_AI0.nivel_limnimetrico_m < 0) ads1_AI0.nivel_limnimetrico_m = 0;\n\n    // Calcular caudal m3/s Rhom.\n    ads1_AI0.caudal_m3s = (0 + 6.81025 * ads1_AI0.nivel_limnimetrico_m + 38.140702 * ads1_AI0.nivel_limnimetrico_m * ads1_AI0.nivel_limnimetrico_m)/1000;\n}\n\n// Pehui: Calculo descarga rebalse m3/s segun medicion nivel\n// AI1 con error\nif (ads1_AI1.voltaje_rebalse < 0.57) {\n    ads1_AI1.sensor_status = \"Error\";\n    ads1_AI1.nivel_limnimetrico_m = 0;\n}\n// Medicion AI1 ok\nelse{\n    ads1_AI1.sensor_status = \"Ok\";\n    // Nivel rebalse lateral Pehui.\n    ads1_AI1.nivel_limnimetrico_m = (1 - 0) / (3 - 0.6) * (ads1_AI1.voltaje_rebalse - ads1_AI1.voltaje_nivel_ref);\n    if(ads1_AI1.nivel_limnimetrico_m < 0) ads1_AI1.nivel_limnimetrico_m = 0;\n\n    // Calcular caudal m3/s Pehui.\n    ads1_AI1.caudal_m3s = (0 + 6.81025 * ads1_AI1.nivel_limnimetrico_m + 38.140702 * ads1_AI1.nivel_limnimetrico_m * ads1_AI1.nivel_limnimetrico_m)/1000;\n}\n\n\n\n\n/* \nPotencia -> Corriente -> voltaje -> Caudal\nRecibe señales de sensores de 4-20mA convertidas a\nvoltaje por medio de tarjeta ADS1115 con direccion 0x49 (ADDR to Vdd).\nADS2 obtiene potencias de turbinas.\nAI0 deberia ser señal potencia Rhom, AI1 señal de Pehui.\n\nRhom 4-20mA -> 0.6-3V -> 0-3500kW\nPehui 4-20mA -> 0.6-3V -> 0-1200kW\n*/\n\nlet ads2_AI0 = {\n    info: \"Señal 4-20mA potencia turbina Rhom\",\n    voltaje_potencia: msg.payload.ads2.A0.voltage,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\nlet ads2_AI1 = {\n    info: \"Señal 4-20mA potencia turbina Pehui\",\n    voltaje_potencia: msg.payload.ads2.A1.voltage,\n    potencia_kw: 0,\n    caudal_m3s: 0,\n    sensor_status: null\n};\n\n// Si la corriente es menor a 4mA o voltaje\n// leido en tarjeta es menor a 0.6V hay un problema\n// con la señal, cable, terminales o tarjeta conversora\n\n// Medicion AI0 con error\nif (ads2_AI0.voltaje_potencia < 0.6) {\n    ads2_AI0.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI0 ok\nelse{\n    ads2_AI0.sensor_status = \"Ok\";\n    // Potencia generacion kW Rhom.\n    ads2_AI0.potencia_kw = (3500 - 0)/(3 - 0.6)*(ads2_AI0.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Rhom.\n    ads2_AI0.caudal_m3s = (594.615 + 0.74642 * ads2_AI0.potencia_kw + 0.0000862 * ads2_AI0.potencia_kw * ads2_AI0.potencia_kw)/1000;\n}\n\n// Medicion AI1 con error\nif (ads2_AI1.voltaje_potencia < 0.6) {\n    ads2_AI1.sensor_status = \"Error\";\n    //msg.payload = \"Señal en AI0 no detectada, posible problema con sensor, conexion o tarjeta interfaz.\";\n}\n// Medicion AI1 ok\nelse{\n    ads2_AI1.sensor_status = \"Ok\";\n    // Potencia generacion kW Pehui.\n    ads2_AI1.potencia_kw = (1200 - 0) / (3 - 0.6) * (ads2_AI1.voltaje_potencia - 0.6);\n\n    // Calcular caudal m3/s Pehui.\n    ads2_AI1.caudal_m3s = (1.30994 + 1.29226 * ads2_AI1.potencia_kw + 0.0000017902862 * ads2_AI1.potencia_kw * ads2_AI1.potencia_kw) / 1000;\n}\n\nlet payload = {};\npayload[\"ads1_AI0\"] = ads1_AI0;\npayload[\"ads1_AI1\"] = ads1_AI1;\npayload[\"ads2_AI0\"] = ads2_AI0;\npayload[\"ads2_AI1\"] = ads2_AI1;\npayload[\"rhom\"] = {\n    caudal_rebalse_m3s: ads1_AI0.caudal_m3s,\n    caudal_turbina_m3s: ads2_AI0.caudal_m3s,\n    caudal_total_m3s: ads1_AI0.caudal_m3s + ads2_AI0.caudal_m3s,\n    nivel_limnimetrico_m: ads1_AI0.nivel_limnimetrico_m};\npayload[\"pehui\"] = {\n    caudal_rebalse_m3s: ads1_AI1.caudal_m3s,\n    caudal_turbina_m3s: ads2_AI1.caudal_m3s,\n    caudal_total_m3s: ads1_AI1.caudal_m3s + ads2_AI1.caudal_m3s,\n    nivel_limnimetrico_m: ads1_AI1.nivel_limnimetrico_m};\n\nmsg.payload = payload;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -385,13 +385,13 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro Pehui",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    0,\n    {{{ msg.payload.pehui_caudales.caudal_total_m3s }}});",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    2,\n    {{{msg.payload.pehui.nivel_limnimetrico_m}}},\n    {{{ msg.payload.pehui.caudal_total_m3s }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 620,
-        "y": 520,
+        "y": 640,
         "wires": [
             []
         ]
@@ -419,11 +419,12 @@
         "repair": false,
         "outputs": 2,
         "x": 350,
-        "y": 500,
+        "y": 680,
         "wires": [
             [
                 "a7765e2ca73f955e",
-                "56a4395ebf5939cd"
+                "56a4395ebf5939cd",
+                "f5c804bed0883b31"
             ],
             [
                 "931c321a8d139939"
@@ -463,7 +464,7 @@
         "property": "payload.ads2_AI1.sensor_status",
         "topi": "topic",
         "x": 600,
-        "y": 580,
+        "y": 700,
         "wires": [
             [
                 "e177fe3b512d5553"
@@ -475,7 +476,7 @@
         "type": "postgresql",
         "z": "f6f2187d.f17ca8",
         "name": "Insertar registro Rhom",
-        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    1,\n    0,\n    {{{ msg.payload.rhom_caudales.caudal_total_m3s }}});",
+        "query": "INSERT INTO registros (fecha_hora,\n    id_obra,\n    nivel_limnimetrico,\n    caudal)\n    VALUES (NOW(), \n    1,\n    {{{ msg.payload.rhom.nivel_limnimetrico_m }}},\n    {{{ msg.payload.rhom.caudal_total_m3s }}});",
         "postgreSQLConfig": "b23d8359c5c9ebfb",
         "split": false,
         "rowsPerMsg": 1,
@@ -497,7 +498,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 770,
-        "y": 580,
+        "y": 700,
         "wires": [
             []
         ]
@@ -551,7 +552,7 @@
         "property": "payload.ads2_AI1.sensor_status",
         "topi": "topic",
         "x": 600,
-        "y": 640,
+        "y": 760,
         "wires": [
             [
                 "dc0248c2ccd031c0"
@@ -569,7 +570,7 @@
         "rowsPerMsg": 1,
         "outputs": 1,
         "x": 770,
-        "y": 640,
+        "y": 760,
         "wires": [
             []
         ]
@@ -600,6 +601,34 @@
         "info": "",
         "x": 700,
         "y": 240,
+        "wires": []
+    },
+    {
+        "id": "f5c804bed0883b31",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "Send-Camara-Carga-Pehui-Data",
+        "topic": "sensor/camara-carga-pehui",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "cc3681ed0c802413",
+        "x": 660,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "50eac7e67f0be72d",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "Envia datos a Raspberry Pi de bocatoma Pehui",
+        "info": "",
+        "x": 700,
+        "y": 540,
         "wires": []
     },
     {
@@ -766,7 +795,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "Extract Response",
-        "func": "let new_payload = msg.payload;\nlet error_counter = context.get('error_counter') || 0;\n\nnew_payload[\"httpStatusCode\"] = msg.statusCode;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    if (new_payload[\"status\"] == \"00\" || \n    new_payload[\"message\"] == \"Ya existe un registro en esa fecha, hora para la obra\") {\n        new_payload[\"estado_dga\"] = 'Enviado ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Status DGA distinto de 00\";\n}\ncatch (error) {\n    context.set('error_counter', error_counter + 1);\n\n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 3) {\n        new_payload[\"estado_dga\"] = 'Error en enviado';\n    }\n    new_payload[\"data\"] = {numeroComprobante: \"0\"};\n    new_payload[\"error\"] = error.toString();\n}\n\nmsg.payload = new_payload;\nreturn msg;",
+        "func": "let new_payload = msg.payload;\nlet error_counter = context.get('error_counter') || 0;\n\nnew_payload[\"httpStatusCode\"] = msg.statusCode; // http code status, no es codigo de DGA.\n\n// Intenta acceder a informacion entregada por servidor de DGA.\ntry {\n    if (new_payload[\"status\"] == \"00\" || new_payload[\"status\"] == \"400\") {\n        new_payload[\"estado_dga\"] = 'enviado - ok';\n        context.set('error_counter', 0);\n        // Si ya existe el registra en la DGA, recuperar numero comprobante de mensaje para guardarlo.\n        if (new_payload[\"status\"] == \"400\"){\n            new_payload[\"data\"] = {};\n            new_payload[\"data\"].numeroComprobante = new_payload[\"message\"].split(\": \")[1];\n        }\n    }\n    else throw \"Status DGA distinto de 00 o 400\";\n}\ncatch (error) {\n    context.set('error_counter', error_counter + 1);\n\n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 3) {\n        new_payload[\"estado_dga\"] = 'Error en enviado';\n    }\n    new_payload[\"data\"] = {numeroComprobante: \"0\"};\n    new_payload[\"error\"] = error.toString();\n}\n\ndelete msg.headers;\ndelete msg.statusCode;\ndelete msg.responseUrl;\ndelete msg.redirectList;\ndelete msg.retry;\n\nmsg.payload = new_payload;\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -976,14 +1005,14 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "128",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 100,
+        "x": 110,
         "y": 660,
         "wires": [
             [
@@ -1143,7 +1172,7 @@
         "type": "function",
         "z": "c19fc8a18bff1dd0",
         "name": "Extract Response",
-        "func": "let new_payload = msg.payload;\nlet error_counter = context.get('error_counter') || 0;\n\nnew_payload[\"httpStatusCode\"] = msg.statusCode;\n\n// Intenta acceder a informacion. Si no puede, servidor de DGA\n// genero error intentando.\ntry {\n    if (new_payload[\"status\"] == \"00\" || \n    new_payload[\"message\"] == \"Ya existe un registro en esa fecha, hora para la obra\") {\n        new_payload[\"estado_dga\"] = 'Enviado ok';\n        context.set('error_counter', 0);\n    }\n    else throw \"Status DGA distinto de 00\";\n}\ncatch (error) {\n    context.set('error_counter', error_counter + 1);\n\n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 3) {\n        new_payload[\"estado_dga\"] = 'Error en enviado';\n    }\n    new_payload[\"data\"] = {numeroComprobante: \"0\"};\n    new_payload[\"error\"] = error.toString();\n}\n\nmsg.payload = new_payload;\nreturn msg;",
+        "func": "let new_payload = msg.payload;\nlet error_counter = context.get('error_counter') || 0;\n\nnew_payload[\"httpStatusCode\"] = msg.statusCode; // http code status, no es codigo de DGA.\n\n// Intenta acceder a informacion entregada por servidor de DGA.\ntry {\n    if (new_payload[\"status\"] == \"00\" || new_payload[\"status\"] == \"400\") {\n        new_payload[\"estado_dga\"] = 'enviado - ok';\n        context.set('error_counter', 0);\n        // Si ya existe el registra en la DGA, recuperar numero comprobante de mensaje para guardarlo.\n        if (new_payload[\"status\"] == \"400\"){\n            new_payload[\"data\"] = {};\n            new_payload[\"data\"].numeroComprobante = new_payload[\"message\"].split(\": \")[1];\n        }\n    }\n    else throw \"Status DGA distinto de 00 o 400\";\n}\ncatch (error) {\n    context.set('error_counter', error_counter + 1);\n\n    // Acumula varios errores antes de definir estado de error.\n    if (error_counter >= 3) {\n        new_payload[\"estado_dga\"] = 'Error en enviado';\n    }\n    new_payload[\"data\"] = {numeroComprobante: \"0\"};\n    new_payload[\"error\"] = error.toString();\n}\n\ndelete msg.headers;\ndelete msg.statusCode;\ndelete msg.responseUrl;\ndelete msg.redirectList;\ndelete msg.retry;\n\nmsg.payload = new_payload;\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
